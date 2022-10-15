@@ -70,7 +70,7 @@ public interface DeviceMapper {
                 "#{ssrcCheck}," +
                 "#{geoCoordSys}," +
                 "#{treeType}," +
-                "#{superviseTargetId}" +
+                "#{superviseTargetId}," +
                 "#{online}" +
             ")")
     int add(Device device);

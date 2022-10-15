@@ -60,15 +60,36 @@ public class ApiStreamController {
 
     /**
      * 实时推流 - 开始推流
-     * @param deviceId 设备编号
+     * @param port 端口
      * @param channelId 通道编号
      * @return
      */
     @RequestMapping(value = "/start")
-    private DeferredResult<JSONObject> start(String deviceId ,
-                                             @RequestParam(required = true) String channelId
+    private DeferredResult<JSONObject> start(String channelId ,
+                                             @RequestParam(required = true) Integer port
     ) {
         DeferredResult<JSONObject> resultDeferredResult = new DeferredResult<>(userSetting.getPlayTimeout().longValue() + 10);
+
+        resultDeferredResult.onTimeout(()->{
+            logger.info("播放等待超时");
+            JSONObject result = new JSONObject();
+            result.put("error","timeout");
+            resultDeferredResult.setResult(result);
+        });
+
+        DeviceChannel deviceChannel = storager.queryChannelByChannelId(channelId);
+        if (deviceChannel == null) {
+            JSONObject result = new JSONObject();
+            result.put("error","channel[ " + channelId + " ]未找到");
+            resultDeferredResult.setResult(result);
+            return resultDeferredResult;
+        } else if (deviceChannel.getStatus() == 0) {
+            JSONObject result = new JSONObject();
+            result.put("error","channel[ " + channelId + " ]offline");
+            resultDeferredResult.setResult(result);
+            return resultDeferredResult;
+        }
+        String deviceId = deviceChannel.getDeviceId();
         Device device = storager.queryVideoDevice(deviceId);
         if (device == null ) {
             JSONObject result = new JSONObject();
@@ -81,25 +102,6 @@ public class ApiStreamController {
             resultDeferredResult.setResult(result);
             return resultDeferredResult;
         }
-        resultDeferredResult.onTimeout(()->{
-            logger.info("播放等待超时");
-            JSONObject result = new JSONObject();
-            result.put("error","timeout");
-            resultDeferredResult.setResult(result);
-        });
-
-        DeviceChannel deviceChannel = storager.queryChannel(deviceId, channelId);
-        if (deviceChannel == null) {
-            JSONObject result = new JSONObject();
-            result.put("error","channel[ " + channelId + " ]未找到");
-            resultDeferredResult.setResult(result);
-            return resultDeferredResult;
-        }else if (deviceChannel.getStatus() == 0) {
-            JSONObject result = new JSONObject();
-            result.put("error","channel[ " + channelId + " ]offline");
-            resultDeferredResult.setResult(result);
-            return resultDeferredResult;
-        }
         MediaServerItem mediaServerItem = playService.getMediaServerItem(device);
         if (Objects.isNull(mediaServerItem)) {
             String streamId;
@@ -109,6 +111,7 @@ public class ApiStreamController {
             } else {
                 streamId = String.format("%s_%s_nonRtp", device.getDeviceId(), channelId);
             }
+            mediaServerItem.setPort(port);
             mediaServerItem.setStream(streamId);
             mediaServerItem.setSsrc(mediaServerItem.getSsrcConfig().getPlaySsrc());
         }

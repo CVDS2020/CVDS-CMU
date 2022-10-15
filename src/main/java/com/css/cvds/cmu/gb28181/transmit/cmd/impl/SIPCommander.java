@@ -1130,7 +1130,6 @@ public class SIPCommander implements ISIPCommander {
         } else if ("UDP".equals(transport)) {
             udpSipProvider.sendRequest(request);
         }
-
     }
 
 

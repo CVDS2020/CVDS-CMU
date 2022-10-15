@@ -3,21 +3,19 @@ package com.css.cvds.cmu.service.impl;
 import com.css.cvds.cmu.conf.DynamicTask;
 import com.css.cvds.cmu.gb28181.bean.*;
 import com.css.cvds.cmu.gb28181.session.VideoStreamSessionManager;
+import com.css.cvds.cmu.gb28181.task.ISubscribeTask;
+import com.css.cvds.cmu.gb28181.task.impl.CatalogSubscribeTask;
+import com.css.cvds.cmu.gb28181.task.impl.MobilePositionSubscribeTask;
 import com.css.cvds.cmu.gb28181.transmit.cmd.ISIPCommander;
+import com.css.cvds.cmu.gb28181.transmit.event.request.impl.message.response.cmd.CatalogResponseMessageHandler;
+import com.css.cvds.cmu.service.IDeviceChannelService;
+import com.css.cvds.cmu.service.IDeviceService;
+import com.css.cvds.cmu.service.IMediaServerService;
 import com.css.cvds.cmu.storager.IRedisCatchStorage;
-import com.css.cvds.cmu.storager.IVideoManagerStorage;
 import com.css.cvds.cmu.storager.dao.DeviceChannelMapper;
 import com.css.cvds.cmu.storager.dao.DeviceMapper;
 import com.css.cvds.cmu.utils.DateUtil;
 import com.css.cvds.cmu.vmanager.bean.BaseTree;
-import com.css.cvds.cmu.gb28181.bean.*;
-import com.css.cvds.cmu.gb28181.task.ISubscribeTask;
-import com.css.cvds.cmu.gb28181.transmit.event.request.impl.message.response.cmd.CatalogResponseMessageHandler;
-import com.css.cvds.cmu.service.IDeviceChannelService;
-import com.css.cvds.cmu.service.IDeviceService;
-import com.css.cvds.cmu.gb28181.task.impl.CatalogSubscribeTask;
-import com.css.cvds.cmu.gb28181.task.impl.MobilePositionSubscribeTask;
-import com.css.cvds.cmu.service.IMediaServerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +39,7 @@ public class DeviceServiceImpl implements IDeviceService {
 
     private final static Logger logger = LoggerFactory.getLogger(DeviceServiceImpl.class);
 
-    private final String  registerExpireTaskKeyPrefix = "device-register-expire-";
+    private final String registerExpireTaskKeyPrefix = "device-register-expire-";
 
     @Autowired
     private DynamicTask dynamicTask;
@@ -63,9 +61,6 @@ public class DeviceServiceImpl implements IDeviceService {
 
     @Autowired
     private DeviceChannelMapper deviceChannelMapper;
-
-    @Autowired
-    private IVideoManagerStorage storage;
 
     @Autowired
     private ISIPCommander commander;
@@ -107,8 +102,8 @@ public class DeviceServiceImpl implements IDeviceService {
                 logger.error("[命令发送失败] 查询设备信息: {}", e.getMessage());
             }
             sync(device);
-        }else {
-            if(device.getOnline() == 0){
+        } else {
+            if (device.getOnline() == 0) {
                 device.setOnline(1);
                 device.setCreateTime(now);
                 logger.info("[设备上线,离线状态下重新注册]: {}，查询设备信息以及通道信息", device.getDeviceId());
@@ -121,11 +116,10 @@ public class DeviceServiceImpl implements IDeviceService {
                 }
                 sync(device);
                 // TODO 如果设备下的通道级联到了其他平台，那么需要发送事件或者notify给上级平台
-            }else {
+            } else {
                 deviceMapper.update(device);
                 redisCatchStorage.updateDevice(device);
             }
-
         }
 
         // 上线添加订阅
@@ -138,7 +132,7 @@ public class DeviceServiceImpl implements IDeviceService {
         }
         // 刷新过期任务
         String registerExpireTaskKey = registerExpireTaskKeyPrefix + device.getDeviceId();
-        dynamicTask.startDelay(registerExpireTaskKey, ()-> offline(device.getDeviceId()), device.getExpires() * 1000);
+        dynamicTask.startDelay(registerExpireTaskKey, () -> offline(device.getDeviceId()), device.getExpires() * 1000);
     }
 
     @Override
@@ -177,9 +171,9 @@ public class DeviceServiceImpl implements IDeviceService {
         // 添加目录订阅
         CatalogSubscribeTask catalogSubscribeTask = new CatalogSubscribeTask(device, sipCommander, dynamicTask);
         // 刷新订阅
-        int subscribeCycleForCatalog = Math.max(device.getSubscribeCycleForCatalog(),30);
+        int subscribeCycleForCatalog = Math.max(device.getSubscribeCycleForCatalog(), 30);
         // 设置最小值为30
-        dynamicTask.startCron(device.getDeviceId() + "catalog", catalogSubscribeTask, (subscribeCycleForCatalog -1) * 1000);
+        dynamicTask.startCron(device.getDeviceId() + "catalog", catalogSubscribeTask, (subscribeCycleForCatalog - 1) * 1000);
         return true;
     }
 
@@ -210,9 +204,9 @@ public class DeviceServiceImpl implements IDeviceService {
         // 添加目录订阅
         MobilePositionSubscribeTask mobilePositionSubscribeTask = new MobilePositionSubscribeTask(device, sipCommander, dynamicTask);
         // 设置最小值为30
-        int subscribeCycleForCatalog = Math.max(device.getSubscribeCycleForMobilePosition(),30);
+        int subscribeCycleForCatalog = Math.max(device.getSubscribeCycleForMobilePosition(), 30);
         // 刷新订阅
-        dynamicTask.startCron(device.getDeviceId() + "mobile_position" , mobilePositionSubscribeTask, (subscribeCycleForCatalog) * 1000);
+        dynamicTask.startCron(device.getDeviceId() + "mobile_position", mobilePositionSubscribeTask, (subscribeCycleForCatalog) * 1000);
         return true;
     }
 
@@ -250,7 +244,7 @@ public class DeviceServiceImpl implements IDeviceService {
             logger.info("开启同步时发现同步已经存在");
             return;
         }
-        int sn = (int)((Math.random()*9+1)*100000);
+        int sn = (int) ((Math.random() * 9 + 1) * 100000);
         catalogResponseMessageHandler.setChannelSyncReady(device, sn);
         try {
             sipCommander.catalogQuery(device, sn, event -> {
@@ -258,7 +252,7 @@ public class DeviceServiceImpl implements IDeviceService {
                 catalogResponseMessageHandler.setChannelSyncEnd(device.getDeviceId(), errorMsg);
             });
         } catch (SipException | InvalidArgumentException | ParseException e) {
-            logger.error("[同步通道], 信令发送失败：{}", e.getMessage() );
+            logger.error("[同步通道], 信令发送失败：{}", e.getMessage());
             String errorMsg = String.format("同步通道失败，信令发送失败： %s", e.getMessage());
             catalogResponseMessageHandler.setChannelSyncEnd(device.getDeviceId(), errorMsg);
         }
@@ -298,7 +292,6 @@ public class DeviceServiceImpl implements IDeviceService {
         } catch (InvalidArgumentException | SipException | ParseException e) {
             logger.error("[命令发送失败] 设备状态查询: {}", e.getMessage());
         }
-
     }
 
     @Override
@@ -331,7 +324,7 @@ public class DeviceServiceImpl implements IDeviceService {
                 // 开启订阅
                 addCatalogSubscribe(deviceInStore);
             }
-        }else if (device.getSubscribeCycleForCatalog() == 0) {
+        } else if (device.getSubscribeCycleForCatalog() == 0) {
             if (deviceInStore.getSubscribeCycleForCatalog() != 0) {
                 deviceInStore.setSubscribeCycleForCatalog(device.getSubscribeCycleForCatalog());
                 // 取消订阅
@@ -347,7 +340,7 @@ public class DeviceServiceImpl implements IDeviceService {
                 // 开启订阅
                 addMobilePositionSubscribe(deviceInStore);
             }
-        }else if (device.getSubscribeCycleForMobilePosition() == 0) {
+        } else if (device.getSubscribeCycleForMobilePosition() == 0) {
             if (deviceInStore.getSubscribeCycleForMobilePosition() != 0) {
                 // 取消订阅
                 removeMobilePositionSubscribe(deviceInStore);
@@ -372,14 +365,14 @@ public class DeviceServiceImpl implements IDeviceService {
      * 更新通道坐标系
      */
     private void updateDeviceChannelGeoCoordSys(Device device) {
-       List<DeviceChannel> deviceChannels =  deviceChannelMapper.getAllChannelWithCoordinate(device.getDeviceId());
-       if (deviceChannels.size() > 0) {
-           List<DeviceChannel> deviceChannelsForStore = new ArrayList<>();
-           for (DeviceChannel deviceChannel : deviceChannels) {
-               deviceChannelsForStore.add(deviceChannelService.updateGps(deviceChannel, device));
-           }
-           deviceChannelService.updateChannels(device.getDeviceId(), deviceChannelsForStore);
-       }
+        List<DeviceChannel> deviceChannels = deviceChannelMapper.getAllChannelWithCoordinate(device.getDeviceId());
+        if (deviceChannels.size() > 0) {
+            List<DeviceChannel> deviceChannelsForStore = new ArrayList<>();
+            for (DeviceChannel deviceChannel : deviceChannels) {
+                deviceChannelsForStore.add(deviceChannelService.updateGps(deviceChannel, device));
+            }
+            deviceChannelService.updateChannels(device.getDeviceId(), deviceChannelsForStore);
+        }
     }
 
 
@@ -396,7 +389,7 @@ public class DeviceServiceImpl implements IDeviceService {
         }
 
         if (TreeType.CIVIL_CODE.equals(device.getTreeType())) {
-            if (parentId.length()%2 != 0) {
+            if (parentId.length() % 2 != 0) {
                 return null;
             }
             // 使用行政区划展示树
@@ -405,7 +398,7 @@ public class DeviceServiceImpl implements IDeviceService {
                 return null;
             }
 
-            if (parentId.length() == 10 ) {
+            if (parentId.length() == 10) {
                 if (onlyCatalog) {
                     return null;
                 }
@@ -426,7 +419,7 @@ public class DeviceServiceImpl implements IDeviceService {
         }
         // 使用业务分组展示树
         if (TreeType.BUSINESS_GROUP.equals(device.getTreeType())) {
-            if (parentId.length() < 14 ) {
+            if (parentId.length() < 14) {
                 return null;
             }
             List<DeviceChannel> deviceChannels = deviceChannelMapper.queryChannels(deviceId, parentId, null, null, null);
@@ -450,7 +443,7 @@ public class DeviceServiceImpl implements IDeviceService {
         }
 
         if (TreeType.CIVIL_CODE.equals(device.getTreeType())) {
-            if (parentId.length()%2 != 0) {
+            if (parentId.length() % 2 != 0) {
                 return null;
             }
             // 使用行政区划展示树
@@ -459,7 +452,7 @@ public class DeviceServiceImpl implements IDeviceService {
                 return null;
             }
 
-            if (parentId.length() == 10 ) {
+            if (parentId.length() == 10) {
                 // parentId为行业编码， 其下不会再有行政区划
                 List<DeviceChannel> channels = deviceChannelMapper.getChannelsByCivilCode(deviceId, parentId);
                 return channels;
@@ -471,7 +464,7 @@ public class DeviceServiceImpl implements IDeviceService {
         }
         // 使用业务分组展示树
         if (TreeType.BUSINESS_GROUP.equals(device.getTreeType())) {
-            if (parentId.length() < 14 ) {
+            if (parentId.length() < 14) {
                 return null;
             }
             List<DeviceChannel> deviceChannels = deviceChannelMapper.queryChannels(deviceId, parentId, null, null, null);
@@ -500,8 +493,8 @@ public class DeviceServiceImpl implements IDeviceService {
             node.setParent(false);
             if (channel.getChannelId().length() > 8) {
                 String gbCodeType = channel.getChannelId().substring(10, 13);
-                node.setParent(gbCodeType.equals(ChannelIdType.BUSINESS_GROUP) || gbCodeType.equals(ChannelIdType.VIRTUAL_ORGANIZATION) );
-            }else {
+                node.setParent(gbCodeType.equals(ChannelIdType.BUSINESS_GROUP) || gbCodeType.equals(ChannelIdType.VIRTUAL_ORGANIZATION));
+            } else {
                 node.setParent(true);
             }
             treeNotes.add(node);
@@ -517,7 +510,7 @@ public class DeviceServiceImpl implements IDeviceService {
         List<DeviceChannel> result = new ArrayList<>();
         if (isCivilCode) {
             // 使用行政区划
-            Integer length= deviceChannelMapper.getChannelMinLength(deviceId);
+            Integer length = deviceChannelMapper.getChannelMinLength(deviceId);
             if (length == null) {
                 return null;
             }
@@ -536,7 +529,7 @@ public class DeviceServiceImpl implements IDeviceService {
                         result.addAll(nonstandardNode);
                     }
                 }
-            }else {
+            } else {
                 if (haveChannel) {
                     List<DeviceChannel> deviceChannels = deviceChannelMapper.queryChannels(deviceId, null, null, null, null);
                     if (deviceChannels != null && deviceChannels.size() > 0) {
@@ -545,7 +538,7 @@ public class DeviceServiceImpl implements IDeviceService {
                 }
             }
 
-        }else {
+        } else {
             // 使用业务分组+虚拟组织
 
             // 只获取业务分组

@@ -73,6 +73,12 @@ public interface IVideoManagerStorage {
 	DeviceChannel queryChannel(String deviceId, String channelId);
 
 	/**
+	 * 获取某个设备的通道
+	 * @param channelId 通道ID
+	 */
+	DeviceChannel queryChannelByChannelId(String channelId);
+
+	/**
 	 * 删除通道
 	 * @param deviceId 设备ID
 	 * @param channelId 通道ID

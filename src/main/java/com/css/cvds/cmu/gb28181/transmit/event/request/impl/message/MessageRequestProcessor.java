@@ -77,9 +77,37 @@ public class MessageRequestProcessor extends SIPRequestProcessorParent implement
         if (ssrcTransaction != null) {
             deviceId = ssrcTransaction.getDeviceId();
         }
+        // 查询设备是否存在
+        Device device = redisCatchStorage.getDevice(deviceId);
         ServerTransaction serverTransaction = getServerTransaction(evt);
         try {
-            responseAck(serverTransaction, Response.UNSUPPORTED_MEDIA_TYPE, "Unsupported message type, must Control/Notify/Query/Response");
+            Element rootElement = null;
+            try {
+                rootElement = getRootElement(evt);
+                if (rootElement == null) {
+                    logger.error("处理MESSAGE请求  未获取到消息体{}", evt.getRequest());
+                    responseAck(serverTransaction, Response.BAD_REQUEST, "content is null");
+                    return;
+                }
+            } catch (DocumentException e) {
+                logger.warn("解析XML消息内容异常", e);
+                // 不存在则回复404
+                responseAck(serverTransaction, Response.BAD_REQUEST, e.getMessage());
+            }
+            String name = rootElement.getName();
+            IMessageHandler messageHandler = messageHandlerMap.get(name);
+            if (messageHandler != null) {
+                if (device != null) {
+                    messageHandler.handForDevice(evt, device, rootElement);
+                } else {
+                    // 由于上面已经判断都为null则直接返回，所以这里device和parentPlatform必有一个不为null
+                    // messageHandler.handForPlatform(evt, parentPlatform, rootElement);
+                }
+            } else {
+                // 不支持的message
+                // 不存在则回复415
+                responseAck(serverTransaction, Response.UNSUPPORTED_MEDIA_TYPE, "Unsupported message type, must Control/Notify/Query/Response");
+            }
         } catch (SipException e) {
             logger.warn("SIP 回复错误", e);
         } catch (InvalidArgumentException e) {

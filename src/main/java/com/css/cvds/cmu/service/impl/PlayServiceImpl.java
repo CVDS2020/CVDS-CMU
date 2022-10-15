@@ -89,24 +89,6 @@ public class PlayServiceImpl implements IPlayService {
                      InviteTimeOutCallback timeoutCallback, String uuid) {
 
         logger.info("[点播开始] deviceId: {}, channelId: {},收流端口： {}, 收流模式：{}, SSRC: {}, SSRC校验：{}", device.getDeviceId(), channelId, mediaServerItem.getPort(), device.getStreamMode(), mediaServerItem.getSsrc(), device.isSsrcCheck() );
-        // 超时处理
-        String timeOutTaskKey = UUID.randomUUID().toString();
-        System.out.println("设置超时任务： " + timeOutTaskKey);
-        dynamicTask.startDelay( timeOutTaskKey,()->{
-
-            logger.info("[点播超时] 收流超时 deviceId: {}, channelId: {}，端口：{}, SSRC: {}", device.getDeviceId(), channelId, mediaServerItem.getPort(), mediaServerItem.getSsrc());
-            timeoutCallback.run(1, "收流超时");
-            // 点播超时回复BYE 同时释放ssrc以及此次点播的资源
-            try {
-                cmder.streamByeCmd(device, channelId, mediaServerItem.getStream(), null);
-            } catch (InvalidArgumentException | ParseException | SipException e) {
-                logger.error("[点播超时]， 发送BYE失败 {}", e.getMessage());
-            } catch (SsrcTransactionNotFoundException e) {
-                timeoutCallback.run(0, "点播超时");
-                mediaServerService.releaseSsrc(mediaServerItem.getId(), mediaServerItem.getSsrc());
-                streamSession.remove(device.getDeviceId(), channelId, mediaServerItem.getStream());
-            }
-        }, userSetting.getPlayTimeout());
         final String ssrc = mediaServerItem.getSsrc();
         //端口获取失败的ssrcInfo 没有必要发送点播指令
         if(mediaServerItem.getPort() <= 0){
@@ -139,20 +121,16 @@ public class PlayServiceImpl implements IPlayService {
                             event.msg = "下级自定义了ssrc,但是此ssrc不可用";
                             event.statusCode = 400;
                             errorEvent.response(event);
-                            return;
                         }
                     }
                 }
             }, (event) -> {
-                dynamicTask.stop(timeOutTaskKey);
                 // 释放ssrc
                 mediaServerService.releaseSsrc(mediaServerItem.getId(), mediaServerItem.getSsrc());
                 streamSession.remove(device.getDeviceId(), channelId, mediaServerItem.getStream());
             });
         } catch (InvalidArgumentException | SipException | ParseException e) {
-
             logger.error("[命令发送失败] 点播消息: {}", e.getMessage());
-            dynamicTask.stop(timeOutTaskKey);
             // 释放ssrc
             mediaServerService.releaseSsrc(mediaServerItem.getId(), mediaServerItem.getSsrc());
 
@@ -198,17 +176,9 @@ public class PlayServiceImpl implements IPlayService {
             }
         }
         if (streamInfo == null) {
-            String streamId = null;
-            if (mediaServerItem.isRtpEnable()) {
-                streamId = String.format("%s_%s", device.getDeviceId(), channelId);
-            } else {
-                streamId = String.format("%s_%s_nonRtp", device.getDeviceId(), channelId);
-            }
-            SsrcConfig ssrcConfig = mediaServerItem.getSsrcConfig();
-            SSRCInfo ssrcInfo = new SSRCInfo(mediaServerItem.getPort(), ssrcConfig.getPlaySsrc(), streamId);
             play(mediaServerItem, device, channelId, event -> {
 
-            }, (code, msgStr)->{
+            }, (code, msgStr) -> {
                 // invite点播超时
                 WVPResult wvpResult = new WVPResult();
                 wvpResult.setCode(ErrorCode.ERROR100.getCode());

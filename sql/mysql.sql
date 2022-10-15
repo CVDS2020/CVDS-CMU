@@ -43,7 +43,7 @@ CREATE TABLE `device` (
     `hostAddress` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
     `netmask` varchar(50) DEFAULT NULL COMMENT '子网掩码',
     `gateway` varchar(50) DEFAULT NULL COMMENT '网关',
-    `superviseTargetId` int(11) NOT NULL COMMENT '监视物ID',
+    `superviseTargetId` int(11) DEFAULT NULL COMMENT '监视物ID',
     `charset` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
     `subscribeCycleForMobilePosition` int DEFAULT NULL,
     `mobilePositionSubmissionInterval` int DEFAULT '5',

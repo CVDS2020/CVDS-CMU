@@ -22,13 +22,7 @@ import java.util.List;
 public class SipDeviceRunner implements CommandLineRunner {
 
     @Autowired
-    private IVideoManagerStorage storager;
-
-    @Autowired
     private IRedisCatchStorage redisCatchStorage;
-
-    @Autowired
-    private UserSetting userSetting;
 
     @Autowired
     private IDeviceService deviceService;

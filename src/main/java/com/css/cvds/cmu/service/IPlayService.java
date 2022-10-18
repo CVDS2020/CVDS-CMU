@@ -25,8 +25,7 @@ import java.text.ParseException;
 public interface IPlayService {
 
     void play(MediaServerItem mediaServerItem, Device device, String channelId,
-                     SipSubscribe.Event errorEvent,
-                     InviteTimeOutCallback timeoutCallback, String uuid);
+                SipSubscribe.Event okEvent, SipSubscribe.Event errorEvent);
     PlayResult play(MediaServerItem mediaServerItem, String deviceId, String channelId, SipSubscribe.Event errorEvent, Runnable timeoutCallback);
 
     MediaServerItem getMediaServerItem(Device device);

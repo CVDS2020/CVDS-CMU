@@ -12,7 +12,7 @@
 	<groupId>com.css</groupId>
 	<artifactId>cvds-cmu</artifactId>
 	<version>1.0.0</version>
-	<name>css video platform</name>
+	<name>CVDS-CMU</name>
 	<description>中软视频平台</description>
 
 	<repositories>

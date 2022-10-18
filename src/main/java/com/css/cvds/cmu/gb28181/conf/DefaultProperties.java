@@ -39,7 +39,7 @@ public class DefaultProperties {
         /**
          * sip_server_log.log 和 sip_debug_log.log ERROR, INFO, WARNING, OFF, DEBUG, TRACE
          */
-        properties.setProperty("gov.nist.javax.sip.TRACE_LEVEL", "ERROR");
+        properties.setProperty("gov.nist.javax.sip.TRACE_LEVEL", "TRACE");
 
         return properties;
     }

@@ -15,6 +15,9 @@ import com.css.cvds.cmu.service.IPlayService;
 import com.css.cvds.cmu.service.bean.PlayResult;
 import com.css.cvds.cmu.storager.IRedisCatchStorage;
 import com.css.cvds.cmu.storager.IVideoManagerStorage;
+import com.css.cvds.cmu.vmanager.bean.ErrorCode;
+import com.css.cvds.cmu.vmanager.bean.WVPResult;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,9 +58,6 @@ public class ApiStreamController {
     @Autowired
     private IPlayService playService;
 
-    @Autowired
-    private SipConfig sipConfig;
-
     /**
      * 实时推流 - 开始推流
      * @param port 端口
@@ -65,41 +65,32 @@ public class ApiStreamController {
      * @return
      */
     @RequestMapping(value = "/start")
-    private DeferredResult<JSONObject> start(String channelId ,
-                                             @RequestParam(required = true) Integer port
+    private DeferredResult<WVPResult<String>> start(@RequestParam()String channelId,
+                                                    @RequestParam(required = false)String ip,
+                                                    @RequestParam()Integer port
     ) {
-        DeferredResult<JSONObject> resultDeferredResult = new DeferredResult<>(userSetting.getPlayTimeout().longValue() + 10);
+        DeferredResult<WVPResult<String>> resultDeferredResult = new DeferredResult<>(userSetting.getPlayTimeout().longValue() + 10);
 
         resultDeferredResult.onTimeout(()->{
-            logger.info("播放等待超时");
-            JSONObject result = new JSONObject();
-            result.put("error","timeout");
-            resultDeferredResult.setResult(result);
+            logger.info("等待超时");
+            resultDeferredResult.setResult(WVPResult.fail(ErrorCode.ERROR100.getCode(), "超时"));
         });
 
         DeviceChannel deviceChannel = storager.queryChannelByChannelId(channelId);
         if (deviceChannel == null) {
-            JSONObject result = new JSONObject();
-            result.put("error","channel[ " + channelId + " ]未找到");
-            resultDeferredResult.setResult(result);
+            resultDeferredResult.setResult(WVPResult.fail(ErrorCode.ERROR400.getCode(), "channel[ " + channelId + " ]未找到"));
             return resultDeferredResult;
         } else if (deviceChannel.getStatus() == 0) {
-            JSONObject result = new JSONObject();
-            result.put("error","channel[ " + channelId + " ]offline");
-            resultDeferredResult.setResult(result);
+            resultDeferredResult.setResult(WVPResult.fail(ErrorCode.ERROR100.getCode(), "channel[ " + channelId + " ]offline"));
             return resultDeferredResult;
         }
         String deviceId = deviceChannel.getDeviceId();
         Device device = storager.queryVideoDevice(deviceId);
         if (device == null ) {
-            JSONObject result = new JSONObject();
-            result.put("error","device[ " + deviceId + " ]未找到");
-            resultDeferredResult.setResult(result);
+            resultDeferredResult.setResult(WVPResult.fail(ErrorCode.ERROR100.getCode(), "device[ " + deviceId + " ]未找到"));
             return resultDeferredResult;
         } else if (device.getOnline() == 0) {
-            JSONObject result = new JSONObject();
-            result.put("error","device[ " + channelId + " ]offline");
-            resultDeferredResult.setResult(result);
+            resultDeferredResult.setResult(WVPResult.fail(ErrorCode.ERROR100.getCode(), "device[ " + channelId + " ]offline"));
             return resultDeferredResult;
         }
         MediaServerItem mediaServerItem = playService.getMediaServerItem(device);
@@ -111,15 +102,20 @@ public class ApiStreamController {
             } else {
                 streamId = String.format("%s_%s_nonRtp", device.getDeviceId(), channelId);
             }
+            if (StringUtils.isNoneBlank(ip)) {
+                mediaServerItem.setIp(ip);
+                mediaServerItem.setSdpIp(ip);
+            }
             mediaServerItem.setPort(port);
             mediaServerItem.setStream(streamId);
             mediaServerItem.setSsrc(mediaServerItem.getSsrcConfig().getPlaySsrc());
         }
-        PlayResult play = playService.play(mediaServerItem, deviceId, channelId, (eventResult) -> {
-            JSONObject result = new JSONObject();
-            result.put("error", "channel[ " + channelId + " ] " + eventResult.msg);
-            resultDeferredResult.setResult(result);
-        }, null);
+        playService.play(mediaServerItem, device, channelId, (okEvent) -> {
+            resultDeferredResult.setResult(WVPResult.success(null));
+        }, (eventResult) -> {
+            resultDeferredResult.setResult(WVPResult.fail(ErrorCode.ERROR100.getCode(),
+                    "channel[ " + channelId + " ] " + eventResult.msg));
+        });
         return resultDeferredResult;
     }
 

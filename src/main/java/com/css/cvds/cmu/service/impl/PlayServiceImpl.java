@@ -85,18 +85,17 @@ public class PlayServiceImpl implements IPlayService {
 
     @Override
     public void play(MediaServerItem mediaServerItem, Device device, String channelId,
-                     SipSubscribe.Event errorEvent,
-                     InviteTimeOutCallback timeoutCallback, String uuid) {
+                     SipSubscribe.Event okEvent, SipSubscribe.Event errorEvent) {
 
         logger.info("[点播开始] deviceId: {}, channelId: {},收流端口： {}, 收流模式：{}, SSRC: {}, SSRC校验：{}", device.getDeviceId(), channelId, mediaServerItem.getPort(), device.getStreamMode(), mediaServerItem.getSsrc(), device.isSsrcCheck() );
         final String ssrc = mediaServerItem.getSsrc();
         //端口获取失败的ssrcInfo 没有必要发送点播指令
-        if(mediaServerItem.getPort() <= 0){
+        if(mediaServerItem.getPort() <= 0) {
             logger.info("[点播端口分配异常]，deviceId={},channelId={},ssrc={}", device.getDeviceId(), channelId, ssrc);
             return;
         }
         try {
-            cmder.playStreamCmd(mediaServerItem, device, channelId, (event) -> {
+            /*
                 ResponseEvent responseEvent = (ResponseEvent)event.event;
                 String contentString = new String(responseEvent.getResponse().getRawContent());
                 // 获取ssrc
@@ -124,10 +123,12 @@ public class PlayServiceImpl implements IPlayService {
                         }
                     }
                 }
-            }, (event) -> {
+ */
+            cmder.playStreamCmd(mediaServerItem, device, channelId, okEvent, (event) -> {
                 // 释放ssrc
                 mediaServerService.releaseSsrc(mediaServerItem.getId(), mediaServerItem.getSsrc());
                 streamSession.remove(device.getDeviceId(), channelId, mediaServerItem.getStream());
+                errorEvent.response(event);
             });
         } catch (InvalidArgumentException | SipException | ParseException e) {
             logger.error("[命令发送失败] 点播消息: {}", e.getMessage());
@@ -176,21 +177,9 @@ public class PlayServiceImpl implements IPlayService {
             }
         }
         if (streamInfo == null) {
-            play(mediaServerItem, device, channelId, event -> {
+            play(mediaServerItem, device, channelId, okEvent -> {}, event -> {
 
-            }, (code, msgStr) -> {
-                // invite点播超时
-                WVPResult wvpResult = new WVPResult();
-                wvpResult.setCode(ErrorCode.ERROR100.getCode());
-                if (code == 0) {
-                    wvpResult.setMsg("点播超时，请稍候重试");
-                }else if (code == 1) {
-                    wvpResult.setMsg("收流超时，请稍候重试");
-                }
-                msg.setData(wvpResult);
-                // 回复之前所有的点播请求
-                resultHolder.invokeAllResult(msg);
-            }, uuid);
+            });
         }
         return playResult;
     }

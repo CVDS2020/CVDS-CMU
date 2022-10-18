@@ -32,11 +32,12 @@ public class SipDeviceRunner implements CommandLineRunner {
         List<Device> deviceList = deviceService.getAllOnlineDevice();
 
         for (Device device : deviceList) {
-            if (deviceService.expire(device)){
-                deviceService.offline(device.getDeviceId());
-            }else {
-                deviceService.online(device);
-            }
+            deviceService.offline(device.getDeviceId());
+//            if (deviceService.expire(device)) {
+//                deviceService.offline(device.getDeviceId());
+//            } else {
+//                deviceService.online(device);
+//            }
         }
         // 重置cseq计数
         redisCatchStorage.resetAllCSEQ();

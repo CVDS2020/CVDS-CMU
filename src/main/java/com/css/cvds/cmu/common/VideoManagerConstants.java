@@ -8,41 +8,41 @@ package com.css.cvds.cmu.common;
  */
 public class VideoManagerConstants {
 	
-	public static final String WVP_SERVER_PREFIX = "VMP_SIGNALLING_SERVER_INFO_";
+	public static final String WVP_SERVER_PREFIX = "CVDS_SIGNALLING_SERVER_INFO_";
 
-	public static final String WVP_SERVER_STREAM_PREFIX = "VMP_SIGNALLING_STREAM_";
+	public static final String WVP_SERVER_STREAM_PREFIX = "CVDS_SIGNALLING_STREAM_";
 
-	public static final String MEDIA_SERVER_PREFIX = "VMP_MEDIA_SERVER_";
+	public static final String MEDIA_SERVER_PREFIX = "CVDS_MEDIA_SERVER_";
 
-	public static final String MEDIA_SERVERS_ONLINE_PREFIX = "VMP_MEDIA_ONLINE_SERVERS_";
+	public static final String MEDIA_SERVERS_ONLINE_PREFIX = "CVDS_MEDIA_ONLINE_SERVERS_";
 
-	public static final String MEDIA_STREAM_PREFIX = "VMP_MEDIA_STREAM";
+	public static final String MEDIA_STREAM_PREFIX = "CVDS_MEDIA_STREAM";
 
-	public static final String DEVICE_PREFIX = "VMP_DEVICE_";
+	public static final String DEVICE_PREFIX = "CVDS_DEVICE_";
 
 	// 设备同步完成
-	public static final String DEVICE_SYNC_PREFIX = "VMP_DEVICE_SYNC_";
+	public static final String DEVICE_SYNC_PREFIX = "CVDS_DEVICE_SYNC_";
 
-	public static final String CACHEKEY_PREFIX = "VMP_CHANNEL_";
+	public static final String CACHEKEY_PREFIX = "CVDS_CHANNEL_";
 
-	public static final String KEEPLIVEKEY_PREFIX = "VMP_KEEPALIVE_";
+	public static final String KEEPLIVEKEY_PREFIX = "CVDS_KEEPALIVE_";
 
 	// 此处多了一个_，暂不修改
-	public static final String PLAYER_PREFIX = "VMP_PLAYER_";
-	public static final String PLAY_BLACK_PREFIX = "VMP_PLAYBACK_";
-	public static final String PLAY_INFO_PREFIX = "VMP_PLAY_INFO_";
+	public static final String PLAYER_PREFIX = "CVDS_PLAYER_";
+	public static final String PLAY_BLACK_PREFIX = "CVDS_PLAYBACK_";
+	public static final String PLAY_INFO_PREFIX = "CVDS_PLAY_INFO_";
 
-	public static final String DOWNLOAD_PREFIX = "VMP_DOWNLOAD_";
+	public static final String DOWNLOAD_PREFIX = "CVDS_DOWNLOAD_";
 
-	public static final String PLATFORM_KEEPALIVE_PREFIX = "VMP_PLATFORM_KEEPALIVE_";
+	public static final String PLATFORM_KEEPALIVE_PREFIX = "CVDS_PLATFORM_KEEPALIVE_";
 
-	public static final String PLATFORM_CATCH_PREFIX = "VMP_PLATFORM_CATCH_";
+	public static final String PLATFORM_CATCH_PREFIX = "CVDS_PLATFORM_CATCH_";
 
-	public static final String PLATFORM_REGISTER_PREFIX = "VMP_PLATFORM_REGISTER_";
+	public static final String PLATFORM_REGISTER_PREFIX = "CVDS_PLATFORM_REGISTER_";
 
-	public static final String PLATFORM_REGISTER_INFO_PREFIX = "VMP_PLATFORM_REGISTER_INFO_";
+	public static final String PLATFORM_REGISTER_INFO_PREFIX = "CVDS_PLATFORM_REGISTER_INFO_";
 
-	public static final String PLATFORM_SEND_RTP_INFO_PREFIX = "VMP_PLATFORM_SEND_RTP_INFO_";
+	public static final String PLATFORM_SEND_RTP_INFO_PREFIX = "CVDS_PLATFORM_SEND_RTP_INFO_";
 
 	public static final String EVENT_ONLINE_REGISTER = "1";
 
@@ -52,23 +52,23 @@ public class VideoManagerConstants {
 	
 	public static final String EVENT_OUTLINE_TIMEOUT = "2";
 
-	public static final String MEDIA_SSRC_USED_PREFIX = "VMP_MEDIA_USED_SSRC_";
+	public static final String MEDIA_SSRC_USED_PREFIX = "CVDS_MEDIA_USED_SSRC_";
 
-	public static final String MEDIA_TRANSACTION_USED_PREFIX = "VMP_MEDIA_TRANSACTION_";
+	public static final String MEDIA_TRANSACTION_USED_PREFIX = "CVDS_MEDIA_TRANSACTION_";
 
 	public static final String MEDIA_STREAM_AUTHORITY = "MEDIA_STREAM_AUTHORITY_";
 
-	public static final String SIP_CSEQ_PREFIX = "VMP_SIP_CSEQ_";
+	public static final String SIP_CSEQ_PREFIX = "CVDS_SIP_CSEQ_";
 
-	public static final String SIP_SN_PREFIX = "VMP_SIP_SN_";
+	public static final String SIP_SN_PREFIX = "CVDS_SIP_SN_";
 
-	public static final String SIP_SUBSCRIBE_PREFIX = "VMP_SIP_SUBSCRIBE_";
+	public static final String SIP_SUBSCRIBE_PREFIX = "CVDS_SIP_SUBSCRIBE_";
 
-	public static final String SYSTEM_INFO_CPU_PREFIX = "VMP_SYSTEM_INFO_CPU_";
+	public static final String SYSTEM_INFO_CPU_PREFIX = "CVDS_SYSTEM_INFO_CPU_";
 
-	public static final String SYSTEM_INFO_MEM_PREFIX = "VMP_SYSTEM_INFO_MEM_";
+	public static final String SYSTEM_INFO_MEM_PREFIX = "CVDS_SYSTEM_INFO_MEM_";
 
-	public static final String SYSTEM_INFO_NET_PREFIX = "VMP_SYSTEM_INFO_NET_";
+	public static final String SYSTEM_INFO_NET_PREFIX = "CVDS_SYSTEM_INFO_NET_";
 
 
 
@@ -78,37 +78,37 @@ public class VideoManagerConstants {
 	/**
 	 * 流变化的通知
 	 */
-	public static final String WVP_MSG_STREAM_CHANGE_PREFIX = "WVP_MSG_STREAM_CHANGE_";
+	public static final String WVP_MSG_STREAM_CHANGE_PREFIX = "CVDS_MSG_STREAM_CHANGE_";
 
 	/**
 	 * 接收推流设备的GPS变化通知
 	 */
-	public static final String VM_MSG_GPS = "VM_MSG_GPS";
+	public static final String VM_MSG_GPS = "CVDS_MSG_GPS";
 
 	/**
 	 * 接收推流设备的GPS变化通知
 	 */
-	public static final String VM_MSG_PUSH_STREAM_STATUS_CHANGE = "VM_MSG_PUSH_STREAM_STATUS_CHANGE";
+	public static final String VM_MSG_PUSH_STREAM_STATUS_CHANGE = "CVDS_MSG_PUSH_STREAM_STATUS_CHANGE";
 	/**
 	 * 接收推流设备列表更新变化通知
 	 */
-	public static final String VM_MSG_PUSH_STREAM_LIST_CHANGE = "VM_MSG_PUSH_STREAM_LIST_CHANGE";
+	public static final String VM_MSG_PUSH_STREAM_LIST_CHANGE = "CVDS_MSG_PUSH_STREAM_LIST_CHANGE";
 
 	/**
 	 * redis 消息通知设备推流到平台
 	 */
-	public static final String VM_MSG_STREAM_PUSH_REQUESTED = "VM_MSG_STREAM_PUSH_REQUESTED";
+	public static final String VM_MSG_STREAM_PUSH_REQUESTED = "CVDS_MSG_STREAM_PUSH_REQUESTED";
 
 
 	/**
 	 * redis 消息通知平台通知设备推流结果
 	 */
-	public static final String VM_MSG_STREAM_PUSH_RESPONSE = "VM_MSG_STREAM_PUSH_RESPONSE";
+	public static final String VM_MSG_STREAM_PUSH_RESPONSE = "CVDS_MSG_STREAM_PUSH_RESPONSE";
 
 	/**
 	 * redis 消息请求所有的在线通道
 	 */
-	public static final String VM_MSG_GET_ALL_ONLINE_REQUESTED = "VM_MSG_GET_ALL_ONLINE_REQUESTED";
+	public static final String VM_MSG_GET_ALL_ONLINE_REQUESTED = "CVDS_MSG_GET_ALL_ONLINE_REQUESTED";
 
 	/**
 	 * 移动位置订阅通知
@@ -134,6 +134,6 @@ public class VideoManagerConstants {
 	//**************************    第三方  ****************************************
 
 	public static final String WVP_STREAM_GB_ID_PREFIX = "memberNo_";
-	public static final String WVP_STREAM_GPS_MSG_PREFIX = "WVP_STREAM_GPS_MSG_";
+	public static final String WVP_STREAM_GPS_MSG_PREFIX = "CVDS_STREAM_GPS_MSG_";
 
 }

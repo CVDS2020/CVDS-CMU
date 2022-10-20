@@ -16,11 +16,11 @@ public interface DeviceChannelMapper {
     @Insert("INSERT INTO device_channel (channelId, deviceId, name, manufacture, model, owner, civilCode, block, " +
             "address, parental, parentId, safetyWay, registerWay, certNum, certifiable, errCode, secrecy, " +
             "ipAddress, port, password, PTZType, status, streamId, longitude, latitude, longitudeGcj02, latitudeGcj02, " +
-            "longitudeWgs84, latitudeWgs84, hasAudio, createTime, updateTime, businessGroupId, gpsTime) " +
+            "longitudeWgs84, latitudeWgs84, hasAudio, createTime, updateTime, businessGroupId, gpsTime, storagePlan) " +
             "VALUES ('${channelId}', '${deviceId}', '${name}', '${manufacture}', '${model}', '${owner}', '${civilCode}', '${block}'," +
             "'${address}', ${parental}, '${parentId}', ${safetyWay}, ${registerWay}, '${certNum}', ${certifiable}, ${errCode}, '${secrecy}', " +
             "'${ipAddress}', ${port}, '${password}', ${PTZType}, ${status}, '${streamId}', ${longitude}, ${latitude}, ${longitudeGcj02}, " +
-            "${latitudeGcj02}, ${longitudeWgs84}, ${latitudeWgs84}, ${hasAudio}, '${createTime}', '${updateTime}', '${businessGroupId}', '${gpsTime}')")
+            "${latitudeGcj02}, ${longitudeWgs84}, ${latitudeWgs84}, ${hasAudio}, '${createTime}', '${updateTime}', '${businessGroupId}', '${gpsTime}', '${storagePlan}')")
     int add(DeviceChannel channel);
 
     @Update(value = {" <script>" +
@@ -56,6 +56,7 @@ public interface DeviceChannelMapper {
             "<if test='latitudeWgs84 != null'>, latitudeWgs84=${latitudeWgs84}</if>" +
             "<if test='businessGroupId != null'>, businessGroupId=#{businessGroupId}</if>" +
             "<if test='gpsTime != null'>, gpsTime=#{gpsTime}</if>" +
+            "<if test='storagePlan != null'>, storagePlan=#{storagePlan}</if>" +
             "WHERE deviceId='${deviceId}' AND channelId='${channelId}'"+
             " </script>"})
     int update(DeviceChannel channel);
@@ -106,7 +107,7 @@ public interface DeviceChannelMapper {
             "(channelId, deviceId, name, manufacture, model, owner, civilCode, block, subCount, " +
             "  address, parental, parentId, safetyWay, registerWay, certNum, certifiable, errCode, secrecy, " +
             "  ipAddress, port, password, PTZType, status, streamId, longitude, latitude, longitudeGcj02, latitudeGcj02, " +
-            "  longitudeWgs84, latitudeWgs84, hasAudio, createTime, updateTime, businessGroupId, gpsTime) " +
+            "  longitudeWgs84, latitudeWgs84, hasAudio, createTime, updateTime, businessGroupId, gpsTime, storagePlan) " +
             "values " +
             "<foreach collection='addChannels' index='index' item='item' separator=','> " +
             "('${item.channelId}', '${item.deviceId}', '${item.name}', '${item.manufacture}', '${item.model}', " +
@@ -116,7 +117,7 @@ public interface DeviceChannelMapper {
             "'${item.ipAddress}', ${item.port}, '${item.password}', ${item.PTZType}, ${item.status}, " +
             "'${item.streamId}', ${item.longitude}, ${item.latitude},${item.longitudeGcj02}, " +
             "${item.latitudeGcj02},${item.longitudeWgs84}, ${item.latitudeWgs84}, ${item.hasAudio},'${item.createTime}', '${item.updateTime}', " +
-            "'${item.businessGroupId}', '${item.gpsTime}') " +
+            "'${item.businessGroupId}', '${item.gpsTime}', '${item.storagePlan}') " +
             "</foreach> " +
             "ON DUPLICATE KEY UPDATE " +
             "updateTime=VALUES(updateTime), " +
@@ -150,7 +151,8 @@ public interface DeviceChannelMapper {
             "latitudeWgs84=VALUES(latitudeWgs84), " +
             "hasAudio=VALUES(hasAudio), " +
             "businessGroupId=VALUES(businessGroupId), " +
-            "gpsTime=VALUES(gpsTime)" +
+            "gpsTime=VALUES(gpsTime), " +
+            "gpsTime=VALUES(storagePlan)" +
             "</script>")
     int batchAdd(List<DeviceChannel> addChannels);
 
@@ -193,6 +195,7 @@ public interface DeviceChannelMapper {
             "<if test='item.latitudeWgs84 != null'>, latitudeWgs84=${item.latitudeWgs84}</if>" +
             "<if test='item.businessGroupId != null'>, businessGroupId=#{item.businessGroupId}</if>" +
             "<if test='item.gpsTime != null'>, gpsTime=#{item.gpsTime}</if>" +
+            "<if test='item.storagePlan != null'>, storagePlan=#{item.storagePlan}</if>" +
             "WHERE deviceId='${item.deviceId}' AND channelId='${item.channelId}'"+
             "</foreach>" +
             "</script>"})

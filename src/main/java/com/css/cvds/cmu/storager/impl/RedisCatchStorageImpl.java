@@ -75,7 +75,7 @@ public class RedisCatchStorageImpl implements IRedisCatchStorage {
     @Override
     public boolean startPlay(StreamInfo stream) {
         return RedisUtil.set(String.format("%S_%S_%s_%s_%s", VideoManagerConstants.PLAYER_PREFIX, userSetting.getServerId(),
-                        stream.getStream(), stream.getDeviceID(), stream.getChannelId()),
+                        stream.getStream(), stream.getDeviceId(), stream.getChannelId()),
                 stream);
     }
 
@@ -92,7 +92,7 @@ public class RedisCatchStorageImpl implements IRedisCatchStorage {
         return RedisUtil.del(String.format("%S_%s_%s_%s_%s", VideoManagerConstants.PLAYER_PREFIX,
                 userSetting.getServerId(),
                 streamInfo.getStream(),
-                streamInfo.getDeviceID(),
+                streamInfo.getDeviceId(),
                 streamInfo.getChannelId()));
     }
 
@@ -113,10 +113,10 @@ public class RedisCatchStorageImpl implements IRedisCatchStorage {
         boolean result;
         if (stream.getProgress() == 1) {
             result = RedisUtil.set(String.format("%S_%s_%s_%s_%s_%s", VideoManagerConstants.DOWNLOAD_PREFIX,
-                    userSetting.getServerId(), stream.getDeviceID(), stream.getChannelId(), stream.getStream(), callId), stream);
+                    userSetting.getServerId(), stream.getDeviceId(), stream.getChannelId(), stream.getStream(), callId), stream);
         }else {
             result = RedisUtil.set(String.format("%S_%s_%s_%s_%s_%s", VideoManagerConstants.DOWNLOAD_PREFIX,
-                    userSetting.getServerId(), stream.getDeviceID(), stream.getChannelId(), stream.getStream(), callId), stream, 60*60);
+                    userSetting.getServerId(), stream.getDeviceId(), stream.getChannelId(), stream.getStream(), callId), stream, 60*60);
         }
         return result;
     }

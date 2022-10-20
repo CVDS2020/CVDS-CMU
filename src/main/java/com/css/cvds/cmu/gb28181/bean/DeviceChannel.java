@@ -10,7 +10,7 @@ public class DeviceChannel {
 	 * 数据库自增ID
 	 */
 	@Schema(description = "数据库自增ID")
-	private int id;
+	private long id;
 
 	/**
 	 * 通道国标编号
@@ -246,11 +246,17 @@ public class DeviceChannel {
 	@Schema(description = "GPS的更新时间")
 	private String gpsTime;
 
-	public int getId() {
+	/**
+	 * 存储计划
+	 */
+	@Schema(description = "存储计划")
+	private long storagePlan;
+
+	public long getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(long id) {
 		this.id = id;
 	}
 
@@ -573,5 +579,13 @@ public class DeviceChannel {
 
 	public void setGpsTime(String gpsTime) {
 		this.gpsTime = gpsTime;
+	}
+
+	public long getStoragePlan() {
+		return storagePlan;
+	}
+
+	public void setStoragePlan(long storagePlan) {
+		this.storagePlan = storagePlan;
 	}
 }

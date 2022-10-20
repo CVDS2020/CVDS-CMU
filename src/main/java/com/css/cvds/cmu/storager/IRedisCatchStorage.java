@@ -30,7 +30,6 @@ public interface IRedisCatchStorage {
      */
     boolean startPlay(StreamInfo stream);
 
-
     /**
      * 停止播放时删除
      *

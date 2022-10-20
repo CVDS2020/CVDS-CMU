@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.sip.InvalidArgumentException;
+import javax.sip.ResponseEvent;
 import javax.sip.SipException;
 import java.text.ParseException;
 import java.util.Objects;
@@ -65,26 +66,18 @@ public class ApiStreamController {
      * @return
      */
     @RequestMapping(value = "/start")
-    private DeferredResult<WVPResult<String>> start(@RequestParam()String channelId,
-                                                    @RequestParam(required = false)String ip,
-                                                    @RequestParam()Integer port
+    private DeferredResult<WVPResult<JSONObject>> start(@RequestParam()String deviceId,
+                                                        @RequestParam()String channelId,
+                                                        @RequestParam(required = false)String ip,
+                                                        @RequestParam()Integer port
     ) {
-        DeferredResult<WVPResult<String>> resultDeferredResult = new DeferredResult<>(userSetting.getPlayTimeout().longValue() + 10);
+        DeferredResult<WVPResult<JSONObject>> resultDeferredResult = new DeferredResult<>(userSetting.getPlayTimeout().longValue() + 10);
 
         resultDeferredResult.onTimeout(()->{
             logger.info("等待超时");
             resultDeferredResult.setResult(WVPResult.fail(ErrorCode.ERROR100.getCode(), "超时"));
         });
 
-        DeviceChannel deviceChannel = storager.queryChannelByChannelId(channelId);
-        if (deviceChannel == null) {
-            resultDeferredResult.setResult(WVPResult.fail(ErrorCode.ERROR400.getCode(), "channel[ " + channelId + " ]未找到"));
-            return resultDeferredResult;
-        } else if (deviceChannel.getStatus() == 0) {
-            resultDeferredResult.setResult(WVPResult.fail(ErrorCode.ERROR100.getCode(), "channel[ " + channelId + " ]offline"));
-            return resultDeferredResult;
-        }
-        String deviceId = deviceChannel.getDeviceId();
         Device device = storager.queryVideoDevice(deviceId);
         if (device == null ) {
             resultDeferredResult.setResult(WVPResult.fail(ErrorCode.ERROR100.getCode(), "device[ " + deviceId + " ]未找到"));
@@ -93,9 +86,19 @@ public class ApiStreamController {
             resultDeferredResult.setResult(WVPResult.fail(ErrorCode.ERROR100.getCode(), "device[ " + channelId + " ]offline"));
             return resultDeferredResult;
         }
+
+        DeviceChannel deviceChannel = storager.queryChannel(deviceId, channelId);
+        if (deviceChannel == null) {
+            resultDeferredResult.setResult(WVPResult.fail(ErrorCode.ERROR400.getCode(), "channel[ " + channelId + " ]未找到"));
+            return resultDeferredResult;
+        } else if (deviceChannel.getStatus() == 0) {
+            resultDeferredResult.setResult(WVPResult.fail(ErrorCode.ERROR100.getCode(), "channel[ " + channelId + " ]offline"));
+            return resultDeferredResult;
+        }
+
+        String streamId;
         MediaServerItem mediaServerItem = playService.getMediaServerItem(device);
         if (Objects.isNull(mediaServerItem)) {
-            String streamId;
             mediaServerItem = playService.newMediaServerItem(10001);
             if (mediaServerItem.isRtpEnable()) {
                 streamId = String.format("%s_%s", device.getDeviceId(), channelId);
@@ -109,9 +112,43 @@ public class ApiStreamController {
             mediaServerItem.setPort(port);
             mediaServerItem.setStream(streamId);
             mediaServerItem.setSsrc(mediaServerItem.getSsrcConfig().getPlaySsrc());
+        } else {
+            streamId = mediaServerItem.getStream();
         }
         playService.play(mediaServerItem, device, channelId, (okEvent) -> {
-            resultDeferredResult.setResult(WVPResult.success(null));
+            StreamInfo streamInfo = new StreamInfo();
+            streamInfo.setDeviceId(deviceId);
+            streamInfo.setChannelId(channelId);
+            streamInfo.setStream(streamId);
+            streamInfo.setIp(ip);
+            redisCatchStorage.startPlay(streamInfo);
+            storager.startPlay(deviceId, channelId, streamId);
+
+            ResponseEvent responseEvent = (ResponseEvent)okEvent.event;
+            String contentString = new String(responseEvent.getResponse().getRawContent());
+
+            JSONObject result = new JSONObject();
+            // 获取ssrc
+            final String videoSign = "m=video";
+            int videoIndex = contentString.indexOf(videoSign);
+            if (videoIndex >= 0) {
+                String contentVideo = contentString.substring(videoIndex + videoSign.length());
+                contentVideo = contentVideo.replaceAll("^[　 ]+", "");
+                int portEndIndex = contentVideo.indexOf(' ');
+                if (portEndIndex > 0) {
+                    result.put("port", contentVideo.substring(0, portEndIndex));
+                } else {
+                    result.put("port", contentVideo);
+                }
+            }
+            int ssrcIndex = contentString.indexOf("y=");
+            // 检查是否有y字段
+            if (ssrcIndex >= 0) {
+                //ssrc规定长度为10字节，不取余下长度以避免后续还有“f=”字段 TODO 后续对不规范的非10位ssrc兼容
+                String ssrcInResponse = contentString.substring(ssrcIndex + 2, ssrcIndex + 12);
+                result.put("ssrc", ssrcInResponse);
+            }
+            resultDeferredResult.setResult(WVPResult.success(result));
         }, (eventResult) -> {
             resultDeferredResult.setResult(WVPResult.fail(ErrorCode.ERROR100.getCode(),
                     "channel[ " + channelId + " ] " + eventResult.msg));
@@ -121,60 +158,42 @@ public class ApiStreamController {
 
     /**
      * 实时推流 - 停止推流
-     * @param serial 设备编号
-     * @param channel 通道序号
-     * @param code 通道国标编号
-     * @param check_outputs
+     * @param deviceId 设备编号
+     * @param channelId 通道国标编号
      * @return
      */
     @RequestMapping(value = "/stop")
     @ResponseBody
-    private JSONObject stop(String serial ,
-                            @RequestParam(required = false)Integer channel ,
-                            @RequestParam(required = false)String code,
-                            @RequestParam(required = false)String check_outputs
-
-    ) {
-        StreamInfo streamInfo = redisCatchStorage.queryPlayByDevice(serial, code);
-        if (streamInfo == null) {
-            JSONObject result = new JSONObject();
-            result.put("error","未找到流信息");
-            return result;
-        }
-        Device device = deviceService.queryDevice(serial);
+    private WVPResult<JSONObject> stop(@RequestParam()String deviceId, @RequestParam()String channelId) {
+        Device device = deviceService.queryDevice(deviceId);
         if (device == null) {
-            JSONObject result = new JSONObject();
-            result.put("error","未找到设备");
-            return result;
+            return WVPResult.fail(ErrorCode.ERROR400.getCode(), "device[ " + channelId + " ]未找到设备");
+        }
+        StreamInfo streamInfo = redisCatchStorage.queryPlayByDevice(deviceId, channelId);
+        if (streamInfo == null) {
+            return WVPResult.fail(ErrorCode.ERROR400.getCode(), "stream[ " + channelId + " ]未找到");
         }
         try {
-            cmder.streamByeCmd(device, code, streamInfo.getStream(), null);
+            cmder.streamByeCmd(device, channelId, streamInfo.getStream(), null);
         } catch (InvalidArgumentException | ParseException | SipException | SsrcTransactionNotFoundException e) {
-            JSONObject result = new JSONObject();
-            result.put("error","发送BYE失败：" + e.getMessage());
-            return result;
+            return WVPResult.fail(ErrorCode.ERROR100.getCode(), "发送BYE失败：" + e.getMessage());
         }
         redisCatchStorage.stopPlay(streamInfo);
-        storager.stopPlay(streamInfo.getDeviceID(), streamInfo.getChannelId());
-        return null;
+        storager.stopPlay(streamInfo.getDeviceId(), streamInfo.getChannelId());
+        return WVPResult.success(null);
     }
 
     /**
-     * 实时直播 - 直播流保活
-     * @param serial 设备编号
-     * @param channel 通道序号
-     * @param code 通道国标编号
+     * 流保活
+     * @param deviceId 设备编号
+     * @param channelId 通道序号
      * @return
      */
     @RequestMapping(value = "/touch")
     @ResponseBody
-    private JSONObject touch(String serial ,String t,
-                             @RequestParam(required = false)Integer channel ,
-                             @RequestParam(required = false)String code,
-                             @RequestParam(required = false)String autorestart,
-                             @RequestParam(required = false)String audio,
-                             @RequestParam(required = false)String cdn
-    ){
+    private JSONObject touch(@RequestParam()String deviceId,
+                             @RequestParam()Integer channelId
+    ) {
         return null;
     }
 }

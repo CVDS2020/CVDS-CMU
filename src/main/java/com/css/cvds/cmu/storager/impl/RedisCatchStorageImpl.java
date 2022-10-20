@@ -46,18 +46,6 @@ public class RedisCatchStorageImpl implements IRedisCatchStorage {
     }
 
     @Override
-    public Long getSN(String method) {
-        String key = VideoManagerConstants.SIP_SN_PREFIX  + userSetting.getServerId() + "_" +  method;
-
-        long result =  RedisUtil.incr(key, 1L);
-        if (result > Integer.MAX_VALUE) {
-            RedisUtil.set(key, 1);
-            result = 1;
-        }
-        return result;
-    }
-
-    @Override
     public void resetAllCSEQ() {
         String scanKey = VideoManagerConstants.SIP_CSEQ_PREFIX  + userSetting.getServerId() + "_*";
         List<Object> keys = RedisUtil.scan(scanKey);
@@ -193,70 +181,15 @@ public class RedisCatchStorageImpl implements IRedisCatchStorage {
     }
 
     @Override
-    public StreamInfo queryPlayback(String deviceId, String channelId, String stream, String callId) {
-        if (stream == null && callId == null) {
-            return null;
-        }
-        if (deviceId == null) {
-            deviceId = "*";
-        }
-        if (channelId == null) {
-            channelId = "*";
-        }
-        if (stream == null) {
-            stream = "*";
-        }
-        if (callId == null) {
-            callId = "*";
-        }
-        String key = String.format("%S_%s_%s_%s_%s_%s", VideoManagerConstants.PLAY_BLACK_PREFIX,
-                userSetting.getServerId(),
-                deviceId,
-                channelId,
-                stream,
-                callId
-        );
-        List<Object> streamInfoScan = RedisUtil.scan(key);
-        if (streamInfoScan.size() > 0) {
-            return (StreamInfo) RedisUtil.get((String) streamInfoScan.get(0));
-        }else {
-            return null;
-        }
-    }
-
-    @Override
-    public void updatePlatformCatchInfo(ParentPlatformCatch parentPlatformCatch) {
-        String key = VideoManagerConstants.PLATFORM_CATCH_PREFIX  + userSetting.getServerId() + "_" +  parentPlatformCatch.getId();
-        RedisUtil.set(key, parentPlatformCatch);
-    }
-
-    @Override
     public ParentPlatformCatch queryPlatformCatchInfo(String platformGbId) {
         return (ParentPlatformCatch)RedisUtil.get(VideoManagerConstants.PLATFORM_CATCH_PREFIX + userSetting.getServerId() + "_" + platformGbId);
     }
-
-    @Override
-    public void delPlatformCatchInfo(String platformGbId) {
-        RedisUtil.del(VideoManagerConstants.PLATFORM_CATCH_PREFIX + userSetting.getServerId() + "_" + platformGbId);
-    }
-
-    @Override
-    public void delPlatformKeepalive(String platformGbId) {
-        RedisUtil.del(VideoManagerConstants.PLATFORM_KEEPALIVE_PREFIX + userSetting.getServerId() + "_" + platformGbId);
-    }
-
-    @Override
-    public void delPlatformRegister(String platformGbId) {
-        RedisUtil.del(VideoManagerConstants.PLATFORM_REGISTER_PREFIX + userSetting.getServerId() + "_" + platformGbId);
-    }
-
 
     @Override
     public void updatePlatformRegisterInfo(String callId, PlatformRegisterInfo platformRegisterInfo) {
         String key = VideoManagerConstants.PLATFORM_REGISTER_INFO_PREFIX + userSetting.getServerId() + "_" + callId;
         RedisUtil.set(key, platformRegisterInfo, 30);
     }
-
 
     @Override
     public PlatformRegisterInfo queryPlatformRegisterInfo(String callId) {
@@ -266,14 +199,6 @@ public class RedisCatchStorageImpl implements IRedisCatchStorage {
     @Override
     public void delPlatformRegisterInfo(String callId) {
         RedisUtil.del(VideoManagerConstants.PLATFORM_REGISTER_INFO_PREFIX + userSetting.getServerId() + "_" + callId);
-    }
-
-    @Override
-    public void updateSendRTPSever(SendRtpItem sendRtpItem) {
-        String key = VideoManagerConstants.PLATFORM_SEND_RTP_INFO_PREFIX + userSetting.getServerId() + "_"
-                + sendRtpItem.getPlatformId() + "_" + sendRtpItem.getChannelId() + "_"
-                + sendRtpItem.getStreamId() + "_" + sendRtpItem.getCallId();
-        RedisUtil.set(key, sendRtpItem);
     }
 
     @Override
@@ -298,23 +223,6 @@ public class RedisCatchStorageImpl implements IRedisCatchStorage {
         }else {
             return null;
         }
-    }
-
-    @Override
-    public List<SendRtpItem> querySendRTPServer(String platformGbId) {
-        if (platformGbId == null) {
-            platformGbId = "*";
-        }
-        String key = VideoManagerConstants.PLATFORM_SEND_RTP_INFO_PREFIX + userSetting.getServerId() + "_" + platformGbId + "_*" + "_*" + "_*";
-        List<Object> queryResult = RedisUtil.scan(key);
-        List<SendRtpItem> result= new ArrayList<>();
-
-        for (Object o : queryResult) {
-            String keyItem = (String) o;
-            result.add((SendRtpItem) RedisUtil.get(keyItem));
-        }
-
-        return result;
     }
 
     /**
@@ -377,12 +285,6 @@ public class RedisCatchStorageImpl implements IRedisCatchStorage {
     }
 
     @Override
-    public void removeStream(String mediaServerId, String type, String app, String streamId) {
-        String key = VideoManagerConstants.WVP_SERVER_STREAM_PREFIX + userSetting.getServerId() + "_" + type + "_"  + app + "_" + streamId + "_" + mediaServerId;
-        RedisUtil.del(key);
-    }
-
-    @Override
     public StreamInfo queryDownload(String deviceId, String channelId, String stream, String callId) {
         if (stream == null && callId == null) {
             return null;
@@ -415,24 +317,9 @@ public class RedisCatchStorageImpl implements IRedisCatchStorage {
     }
 
     @Override
-    public void removeStream(String mediaServerId, String type) {
-        String key = VideoManagerConstants.WVP_SERVER_STREAM_PREFIX + userSetting.getServerId() + "_" + type + "_*_*_" + mediaServerId;
-        List<Object> streams = RedisUtil.scan(key);
-        for (Object stream : streams) {
-            RedisUtil.del((String) stream);
-        }
-    }
-
-    @Override
     public void updateDevice(Device device) {
         String key = VideoManagerConstants.DEVICE_PREFIX + userSetting.getServerId() + "_" + device.getDeviceId();
         RedisUtil.set(key, device);
-    }
-
-    @Override
-    public void removeDevice(String deviceId) {
-        String key = VideoManagerConstants.DEVICE_PREFIX + userSetting.getServerId() + "_" + deviceId;
-        RedisUtil.del(key);
     }
 
     @Override
@@ -445,12 +332,6 @@ public class RedisCatchStorageImpl implements IRedisCatchStorage {
     public void updateGpsMsgInfo(GPSMsgInfo gpsMsgInfo) {
         String key = VideoManagerConstants.WVP_STREAM_GPS_MSG_PREFIX + userSetting.getServerId() + "_" + gpsMsgInfo.getId();
         RedisUtil.set(key, gpsMsgInfo, 60); // 默认GPS消息保存1分钟
-    }
-
-    @Override
-    public GPSMsgInfo getGpsMsgInfo(String gbId) {
-        String key = VideoManagerConstants.WVP_STREAM_GPS_MSG_PREFIX + userSetting.getServerId() + "_" + gbId;
-        return (GPSMsgInfo)RedisUtil.get(key);
     }
 
     @Override
@@ -519,13 +400,6 @@ public class RedisCatchStorageImpl implements IRedisCatchStorage {
         String key = VideoManagerConstants.VM_MSG_SUBSCRIBE_MOBILE_POSITION;
         logger.info("[redis发送通知] 移动位置 {}: {}", key, jsonObject.toString());
         RedisUtil.convertAndSend(key, jsonObject);
-    }
-
-    @Override
-    public void sendStreamPushRequestedMsg(MessageForPushChannel msg) {
-        String key = VideoManagerConstants.VM_MSG_STREAM_PUSH_REQUESTED;
-        logger.info("[redis发送通知] 推流被请求 {}: {}/{}", key, msg.getApp(), msg.getStream());
-        RedisUtil.convertAndSend(key, (JSONObject)JSON.toJSON(msg));
     }
 
     @Override

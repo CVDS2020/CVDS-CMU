@@ -59,8 +59,10 @@ public class ApiDeviceController {
             deviceJsonObject.put("Type", "GB");
             deviceJsonObject.put("ChannelCount", device.getChannelCount());
             deviceJsonObject.put("RecvStreamIP", "");
-            deviceJsonObject.put("CatalogInterval", 3600); // 通道目录抓取周期
-            deviceJsonObject.put("SubscribeInterval", device.getSubscribeCycleForCatalog()); // 订阅周期(秒), 0 表示后台不周期订阅
+            // 通道目录抓取周期
+            deviceJsonObject.put("CatalogInterval", 3600);
+            // 订阅周期(秒), 0 表示后台不周期订阅
+            deviceJsonObject.put("SubscribeInterval", device.getSubscribeCycleForCatalog());
             deviceJsonObject.put("Online", device.getOnline() == 1);
             deviceJsonObject.put("Password", "");
             deviceJsonObject.put("MediaTransport", device.getTransport());
@@ -85,9 +87,6 @@ public class ApiDeviceController {
                                    @RequestParam(required = false)String q,
                                    @RequestParam(required = false)Boolean online ){
 
-//        if (logger.isDebugEnabled()) {
-//            logger.debug("查询所有视频设备API调用");
-//        }
         JSONObject result = new JSONObject();
         // 查询设备是否存在
         Device device = storager.queryVideoDevice(serial);
@@ -114,32 +113,40 @@ public class ApiDeviceController {
             deviceJOSNChannel.put("DeviceID", device.getDeviceId());
             deviceJOSNChannel.put("DeviceName", device.getName());
             deviceJOSNChannel.put("DeviceOnline", device.getOnline() == 1);
-            deviceJOSNChannel.put("Channel", 0); // TODO 自定义序号
+            // TODO 自定义序号
+            deviceJOSNChannel.put("Channel", 0);
             deviceJOSNChannel.put("Name", deviceChannel.getName());
             deviceJOSNChannel.put("Custom", false);
             deviceJOSNChannel.put("CustomName", "");
-            deviceJOSNChannel.put("SubCount", deviceChannel.getSubCount()); // TODO ? 子节点数, SubCount > 0 表示该通道为子目录
+            // TODO ? 子节点数, SubCount > 0 表示该通道为子目录
+            deviceJOSNChannel.put("SubCount", deviceChannel.getSubCount());
             deviceJOSNChannel.put("SnapURL", "");
             deviceJOSNChannel.put("Manufacturer ", deviceChannel.getManufacture());
             deviceJOSNChannel.put("Model", deviceChannel.getModel());
             deviceJOSNChannel.put("Owner", deviceChannel.getOwner());
             deviceJOSNChannel.put("CivilCode", deviceChannel.getCivilCode());
             deviceJOSNChannel.put("Address", deviceChannel.getAddress());
-            deviceJOSNChannel.put("Parental", deviceChannel.getParental()); // 当为通道设备时, 是否有通道子设备, 1-有,0-没有
-            deviceJOSNChannel.put("ParentID", deviceChannel.getParentId()); // 直接上级编号
+            // 当为通道设备时, 是否有通道子设备, 1-有,0-没有
+            deviceJOSNChannel.put("Parental", deviceChannel.getParental());
+            // 直接上级编号
+            deviceJOSNChannel.put("ParentID", deviceChannel.getParentId());
             deviceJOSNChannel.put("Secrecy", deviceChannel.getSecrecy());
-            deviceJOSNChannel.put("RegisterWay", 1); // 注册方式, 缺省为1, 允许值: 1, 2, 3
-                                                     // 1-IETF RFC3261,
-                                                     // 2-基于口令的双向认证,
-                                                     // 3-基于数字证书的双向认证
+            // 注册方式, 缺省为1, 允许值: 1, 2, 3
+            // 1-IETF RFC3261,
+            // 2-基于口令的双向认证,
+            // 3-基于数字证书的双向认证
+            deviceJOSNChannel.put("RegisterWay", 1);
             deviceJOSNChannel.put("Status", deviceChannel.getStatus());
             deviceJOSNChannel.put("Longitude", deviceChannel.getLongitudeWgs84());
             deviceJOSNChannel.put("Latitude", deviceChannel.getLatitudeWgs84());
-            deviceJOSNChannel.put("PTZType ", deviceChannel.getPTZType()); // 云台类型, 0 - 未知, 1 - 球机, 2 - 半球,
-                                                                            //   3 - 固定枪机, 4 - 遥控枪机
+            // 云台类型, 0 - 未知, 1 - 球机, 2 - 半球,
+            // 3 - 固定枪机, 4 - 遥控枪机
+            deviceJOSNChannel.put("PTZType ", deviceChannel.getPTZType());
             deviceJOSNChannel.put("CustomPTZType", "");
-            deviceJOSNChannel.put("StreamID", deviceChannel.getStreamId()); // StreamID 直播流ID, 有值表示正在直播
-            deviceJOSNChannel.put("NumOutputs ", -1); // 直播在线人数
+            // StreamID 直播流ID, 有值表示正在直播
+            deviceJOSNChannel.put("StreamID", deviceChannel.getStreamId());
+            // 直播在线人数
+            deviceJOSNChannel.put("NumOutputs ", -1);
             channleJSONList.add(deviceJOSNChannel);
         }
         result.put("ChannelList", channleJSONList);

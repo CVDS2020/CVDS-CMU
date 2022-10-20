@@ -26,6 +26,7 @@ import com.css.cvds.cmu.storager.IVideoManagerStorage;
 import com.css.cvds.cmu.vmanager.bean.ErrorCode;
 import com.css.cvds.cmu.vmanager.bean.WVPResult;
 import com.css.cvds.cmu.service.IDeviceService;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,9 +51,6 @@ public class PlayServiceImpl implements IPlayService {
     private final static Logger logger = LoggerFactory.getLogger(PlayServiceImpl.class);
 
     @Autowired
-    private IVideoManagerStorage storager;
-
-    @Autowired
     private SipConfig sipConfig;
 
     @Autowired
@@ -62,7 +60,10 @@ public class PlayServiceImpl implements IPlayService {
     private IRedisCatchStorage redisCatchStorage;
 
     @Autowired
-    private DeferredResultHolder resultHolder;
+    private IVideoManagerStorage storager;
+
+    @Autowired
+    private IDeviceService deviceService;
 
     @Autowired
     private IMediaServerService mediaServerService;
@@ -76,13 +77,6 @@ public class PlayServiceImpl implements IPlayService {
     @Autowired
     private UserSetting userSetting;
 
-    @Autowired
-    private DynamicTask dynamicTask;
-
-    @Qualifier("taskExecutor")
-    @Autowired
-    private ThreadPoolTaskExecutor taskExecutor;
-
     @Override
     public void play(MediaServerItem mediaServerItem, Device device, String channelId,
                      SipSubscribe.Event okEvent, SipSubscribe.Event errorEvent) {
@@ -95,39 +89,49 @@ public class PlayServiceImpl implements IPlayService {
             return;
         }
         try {
-            /*
-                ResponseEvent responseEvent = (ResponseEvent)event.event;
-                String contentString = new String(responseEvent.getResponse().getRawContent());
-                // 获取ssrc
-                int ssrcIndex = contentString.indexOf("y=");
-                // 检查是否有y字段
-                if (ssrcIndex >= 0) {
-                    //ssrc规定长度为10字节，不取余下长度以避免后续还有“f=”字段 TODO 后续对不规范的非10位ssrc兼容
-                    String ssrcInResponse = contentString.substring(ssrcIndex + 2, ssrcIndex + 12);
-                    // 查询到ssrc不一致且开启了ssrc校验则需要针对处理
-                    if (ssrc.equals(ssrcInResponse)) {
-                        return;
-                    }
-                    logger.info("[点播消息] 收到invite 200, 发现下级自定义了ssrc: {}", ssrcInResponse );
-                    if (!mediaServerItem.isRtpEnable() || device.isSsrcCheck()) {
-                        logger.info("[点播消息] SSRC修正 {}->{}", ssrc, ssrcInResponse);
+            cmder.playStreamCmd(mediaServerItem, device, channelId, (okEvt) -> {
+//                ResponseEvent responseEvent = (ResponseEvent)okEvt.event;
+//                String contentString = new String(responseEvent.getResponse().getRawContent());
+//                // 获取ssrc
+//                int ssrcIndex = contentString.indexOf("y=");
+//                // 检查是否有y字段
+//                if (ssrcIndex >= 0) {
+//                    //ssrc规定长度为10字节，不取余下长度以避免后续还有“f=”字段 TODO 后续对不规范的非10位ssrc兼容
+//                    String ssrcInResponse = contentString.substring(ssrcIndex + 2, ssrcIndex + 12);
+//                    // 查询到ssrc不一致且开启了ssrc校验则需要针对处理
+//                    if (ssrc.equals(ssrcInResponse)) {
+//                        return;
+//                    }
+//                    logger.info("[点播消息] 收到invite 200, 发现下级自定义了ssrc: {}", ssrcInResponse );
+//                    if (!mediaServerItem.isRtpEnable() || device.isSsrcCheck()) {
+//                        logger.info("[点播消息] SSRC修正 {}->{}", ssrc, ssrcInResponse);
+//
+//                        if (!mediaServerItem.getSsrcConfig().checkSsrc(ssrcInResponse)) {
+//                            // ssrc 不可用
+//                            // 释放ssrc
+//                            mediaServerService.releaseSsrc(mediaServerItem.getId(), mediaServerItem.getSsrc());
+//                            streamSession.remove(device.getDeviceId(), channelId, mediaServerItem.getStream());
+//                            okEvt.msg = "下级自定义了ssrc,但是此ssrc不可用";
+//                            okEvt.statusCode = 400;
+//                            errorEvent.response(okEvt);
+//                        }
+//                    }
+//                }
 
-                        if (!mediaServerItem.getSsrcConfig().checkSsrc(ssrcInResponse)) {
-                            // ssrc 不可用
-                            // 释放ssrc
-                            mediaServerService.releaseSsrc(mediaServerItem.getId(), mediaServerItem.getSsrc());
-                            streamSession.remove(device.getDeviceId(), channelId, mediaServerItem.getStream());
-                            event.msg = "下级自定义了ssrc,但是此ssrc不可用";
-                            event.statusCode = 400;
-                            errorEvent.response(event);
-                        }
-                    }
-                }
- */
-            cmder.playStreamCmd(mediaServerItem, device, channelId, okEvent, (event) -> {
+                StreamInfo streamInfo = new StreamInfo();
+                streamInfo.setDeviceId(device.getDeviceId());
+                streamInfo.setChannelId(channelId);
+                streamInfo.setStream(mediaServerItem.getStream());
+                streamInfo.setIp(mediaServerItem.getIp());
+                redisCatchStorage.startPlay(streamInfo);
+                storager.startPlay(device.getDeviceId(), channelId, mediaServerItem.getStream());
+
+                okEvent.response(okEvt);
+            }, (event) -> {
                 // 释放ssrc
                 mediaServerService.releaseSsrc(mediaServerItem.getId(), mediaServerItem.getSsrc());
                 streamSession.remove(device.getDeviceId(), channelId, mediaServerItem.getStream());
+
                 errorEvent.response(event);
             });
         } catch (InvalidArgumentException | SipException | ParseException e) {
@@ -143,67 +147,100 @@ public class PlayServiceImpl implements IPlayService {
     }
 
     @Override
-    public PlayResult play(MediaServerItem mediaServerItem, String deviceId, String channelId,
-                           SipSubscribe.Event errorEvent,
-                           Runnable timeoutCallback) {
-        if (Objects.isNull(mediaServerItem)) {
-            throw new ControllerException(ErrorCode.ERROR100);
-        }
-        PlayResult playResult = new PlayResult();
-        RequestMessage msg = new RequestMessage();
-        String key = DeferredResultHolder.CALLBACK_CMD_PLAY + deviceId + channelId;
-        msg.setKey(key);
-        String uuid = UUID.randomUUID().toString();
-        msg.setId(uuid);
-        playResult.setUuid(uuid);
-        DeferredResult<WVPResult<String>> result = new DeferredResult<>(userSetting.getPlayTimeout().longValue());
-        playResult.setResult(result);
-        // 录像查询以channelId作为deviceId查询
-        resultHolder.put(key, uuid, result);
+    public DeferredResult<WVPResult<JSONObject>> play(String deviceId, String channelId, String ip, Integer port) {
+        DeferredResult<WVPResult<JSONObject>> resultDeferredResult =
+                new DeferredResult<>(userSetting.getPlayTimeout().longValue() + 10);
 
-        Device device = redisCatchStorage.getDevice(deviceId);
-        StreamInfo streamInfo = redisCatchStorage.queryPlayByDevice(deviceId, channelId);
-        playResult.setDevice(device);
+        resultDeferredResult.onTimeout(()->{
+            logger.info("等待超时");
+            resultDeferredResult.setResult(WVPResult.fail(ErrorCode.ERROR100.getCode(), "超时"));
+        });
 
-        if (streamInfo != null) {
-            String streamId = streamInfo.getStream();
-            if (streamId == null) {
-                WVPResult wvpResult = new WVPResult();
-                wvpResult.setCode(ErrorCode.ERROR100.getCode());
-                wvpResult.setMsg("点播失败， redis缓存streamId等于null");
-                msg.setData(wvpResult);
-                resultHolder.invokeAllResult(msg);
-                return playResult;
-            }
+        Device device = deviceService.queryDevice(deviceId);
+        if (device == null ) {
+            resultDeferredResult.setResult(WVPResult.fail(ErrorCode.ERROR100.getCode(), "device[ " + deviceId + " ]未找到"));
+            return resultDeferredResult;
+        } else if (device.getOnline() == 0) {
+            resultDeferredResult.setResult(WVPResult.fail(ErrorCode.ERROR100.getCode(), "device[ " + channelId + " ]offline"));
+            return resultDeferredResult;
         }
-        if (streamInfo == null) {
-            play(mediaServerItem, device, channelId, okEvent -> {}, event -> {
 
-            });
+        DeviceChannel deviceChannel = storager.queryChannel(deviceId, channelId);
+        if (deviceChannel == null) {
+            resultDeferredResult.setResult(WVPResult.fail(ErrorCode.ERROR400.getCode(), "channel[ " + channelId + " ]未找到"));
+            return resultDeferredResult;
+        } else if (deviceChannel.getStatus() == 0) {
+            resultDeferredResult.setResult(WVPResult.fail(ErrorCode.ERROR100.getCode(), "channel[ " + channelId + " ]offline"));
+            return resultDeferredResult;
         }
-        return playResult;
-    }
 
-    @Override
-    public MediaServerItem getMediaServerItem(Device device) {
-        if (device == null) {
-            return null;
-        }
-        String mediaServerId = device.getMediaServerId();
-        MediaServerItem mediaServerItem;
-        if (mediaServerId == null) {
-            mediaServerItem = mediaServerService.getMediaServerForMinimumLoad();
-        } else {
-            mediaServerItem = mediaServerService.getOne(mediaServerId);
-        }
-        return mediaServerItem;
-    }
-
-    @Override
-    public MediaServerItem newMediaServerItem(Integer port) {
         MediaServerItem mediaServerItem = mediaConfig.getMediaSerItem();
-        mediaServerItem.setSsrcConfig(new SsrcConfig(mediaServerItem.getId(), null, sipConfig.getDomain()));
+        mediaServerItem.setSsrcConfig(new SsrcConfig(null, sipConfig.getDomain()));
+        mediaServerItem.setSsrc(mediaServerItem.getSsrcConfig().getPlaySsrc());
         mediaServerItem.setPort(port);
-        return mediaServerItem;
+
+        String streamId;
+        if (mediaServerItem.isRtpEnable()) {
+            streamId = String.format("%s_%s", device.getDeviceId(), channelId);
+        } else {
+            streamId = String.format("%s_%s_nonRtp", device.getDeviceId(), channelId);
+        }
+        if (StringUtils.isNoneBlank(ip)) {
+            mediaServerItem.setIp(ip);
+            mediaServerItem.setSdpIp(ip);
+        }
+        mediaServerItem.setStream(streamId);
+
+        play(mediaServerItem, device, channelId, (okEvent) -> {
+            ResponseEvent responseEvent = (ResponseEvent)okEvent.event;
+            String contentString = new String(responseEvent.getResponse().getRawContent());
+
+            JSONObject result = new JSONObject();
+            // 获取ssrc
+            final String videoSign = "m=video";
+            int videoIndex = contentString.indexOf(videoSign);
+            if (videoIndex >= 0) {
+                String contentVideo = contentString.substring(videoIndex + videoSign.length());
+                contentVideo = contentVideo.replaceAll("^[　 ]+", "");
+                int portEndIndex = contentVideo.indexOf(' ');
+                if (portEndIndex > 0) {
+                    result.put("port", contentVideo.substring(0, portEndIndex));
+                } else {
+                    result.put("port", contentVideo);
+                }
+            }
+            int ssrcIndex = contentString.indexOf("y=");
+            // 检查是否有y字段
+            if (ssrcIndex >= 0) {
+                //ssrc规定长度为10字节，不取余下长度以避免后续还有“f=”字段 TODO 后续对不规范的非10位ssrc兼容
+                String ssrcInResponse = contentString.substring(ssrcIndex + 2, ssrcIndex + 12);
+                result.put("ssrc", ssrcInResponse);
+            }
+            resultDeferredResult.setResult(WVPResult.success(result));
+        }, (eventResult) -> {
+            resultDeferredResult.setResult(WVPResult.fail(ErrorCode.ERROR100.getCode(),
+                    "channel[ " + channelId + " ] " + eventResult.msg));
+        });
+        return resultDeferredResult;
+    }
+
+    @Override
+    public WVPResult<String> stop(String deviceId, String channelId) {
+        StreamInfo streamInfo = redisCatchStorage.queryPlayByDevice(deviceId, channelId);
+        if (streamInfo == null) {
+            return WVPResult.fail(ErrorCode.ERROR400.getCode(), "stream[ " + channelId + " ]未找到");
+        }
+        Device device = deviceService.queryDevice(deviceId);
+        if (device == null) {
+            return WVPResult.fail(ErrorCode.ERROR400.getCode(), "device[ " + channelId + " ]未找到设备");
+        }
+        try {
+            cmder.streamByeCmd(device, channelId, streamInfo.getStream(), null);
+        } catch (InvalidArgumentException | ParseException | SipException | SsrcTransactionNotFoundException e) {
+            return WVPResult.fail(ErrorCode.ERROR100.getCode(), "发送BYE失败：" + e.getMessage());
+        }
+        redisCatchStorage.stopPlay(streamInfo);
+        storager.stopPlay(streamInfo.getDeviceId(), streamInfo.getChannelId());
+        return WVPResult.success(null);
     }
 }

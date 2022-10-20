@@ -32,28 +32,25 @@ public class ApiControlController {
 
     /**
      * 设备控制 - 云台控制
-     * @param serial 设备编号
+     * @param deviceId 设备编号
      * @param command 控制指令 允许值: left, right, up, down, upleft, upright, downleft, downright, zoomin, zoomout, stop
-     * @param channel 通道序号
-     * @param code 通道编号
+     * @param channelId 通道编号
      * @param speed 速度(0~255) 默认值: 129
      * @return
      */
     @RequestMapping(value = "/ptz")
-    private void list(String serial,String command,
-                            @RequestParam(required = false)Integer channel,
-                            @RequestParam(required = false)String code,
+    private void list(String deviceId, String command,
+                            @RequestParam(required = false)String channelId,
                             @RequestParam(required = false)Integer speed){
 
         if (logger.isDebugEnabled()) {
             logger.debug("模拟接口> 设备云台控制 API调用，deviceId：{} ，channelId：{} ，command：{} ，speed：{} ",
-                    serial, code, command, speed);
+                    deviceId, channelId, command, speed);
         }
-        if (channel == null) {channel = 0;}
         if (speed == null) {speed = 0;}
-        Device device = storager.queryVideoDevice(serial);
+        Device device = storager.queryVideoDevice(deviceId);
         if (device == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "device[ " + serial + " ]未找到");
+            throw new ControllerException(ErrorCode.ERROR100.getCode(), "device[ " + deviceId + " ]未找到");
         }
         int cmdCode = 0;
         switch (command){
@@ -95,7 +92,7 @@ public class ApiControlController {
         }
         // 默认值 50
         try {
-            cmder.frontEndCmd(device, code, cmdCode, speed, speed, speed);
+            cmder.frontEndCmd(device, channelId, cmdCode, speed, speed, speed);
         } catch (SipException | InvalidArgumentException | ParseException e) {
             logger.error("[命令发送失败] 云台控制: {}", e.getMessage());
             throw new ControllerException(ErrorCode.ERROR100.getCode(), "命令发送失败: " + e.getMessage());

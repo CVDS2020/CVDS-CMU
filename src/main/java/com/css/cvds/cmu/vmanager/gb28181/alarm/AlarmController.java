@@ -38,16 +38,6 @@ public class AlarmController {
     @Autowired
     private IDeviceAlarmService deviceAlarmService;
 
-    @Autowired
-    private ISIPCommander commander;
-
-    @Autowired
-    private ISIPCommanderForPlatform commanderForPlatform;
-
-    @Autowired
-    private IVideoManagerStorage storage;
-
-
     /**
      *  删除报警
      *
@@ -135,7 +125,6 @@ public class AlarmController {
         if (ObjectUtils.isEmpty(endTime)) {
             endTime = null;
         }
-
 
         if (!DateUtil.verification(startTime, DateUtil.formatter) || !DateUtil.verification(endTime, DateUtil.formatter)){
             throw new ControllerException(ErrorCode.ERROR100.getCode(), "开始时间或结束时间格式有误");

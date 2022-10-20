@@ -11,12 +11,6 @@ import java.util.Set;
 @Schema(description = "ssrc信息")
 public class SsrcConfig {
 
-    /**
-     * zlm流媒体服务器Id
-     */
-    @Schema(description = "流媒体服务器Id")
-    private String mediaServerId;
-
     @Schema(description = "SSRC前缀")
     private String ssrcPrefix;
 
@@ -35,8 +29,7 @@ public class SsrcConfig {
     public SsrcConfig() {
     }
 
-    public SsrcConfig(String mediaServerId, Set<String> usedSet, String sipDomain) {
-        this.mediaServerId = mediaServerId;
+    public SsrcConfig(Set<String> usedSet, String sipDomain) {
         this.isUsed = new ArrayList<>();
         this.ssrcPrefix = sipDomain.substring(3, 8);
         this.notUsed = new ArrayList<>();
@@ -58,7 +51,6 @@ public class SsrcConfig {
             }
         }
     }
-
 
     /**
      * 获取视频预览的SSRC值,第一位固定为0
@@ -88,7 +80,7 @@ public class SsrcConfig {
         try {
             isUsed.remove(sn);
             notUsed.add(sn);
-        }catch (NullPointerException e){
+        } catch (NullPointerException e){
         }
     }
 
@@ -114,14 +106,6 @@ public class SsrcConfig {
 
     public String getSsrcPrefix() {
         return ssrcPrefix;
-    }
-
-    public String getMediaServerId() {
-        return mediaServerId;
-    }
-
-    public void setMediaServerId(String mediaServerId) {
-        this.mediaServerId = mediaServerId;
     }
 
     public void setSsrcPrefix(String ssrcPrefix) {

@@ -2,6 +2,7 @@ package com.css.cvds.cmu.web.gb28181;
 
 import com.alibaba.fastjson.JSONObject;
 import com.css.cvds.cmu.common.StreamInfo;
+import com.css.cvds.cmu.conf.MediaConfig;
 import com.css.cvds.cmu.conf.SipConfig;
 import com.css.cvds.cmu.conf.UserSetting;
 import com.css.cvds.cmu.conf.exception.SsrcTransactionNotFoundException;
@@ -59,6 +60,12 @@ public class ApiStreamController {
     @Autowired
     private IPlayService playService;
 
+    @Autowired
+    private MediaConfig mediaConfig;
+
+    @Autowired
+    private SipConfig sipConfig;
+
     /**
      * 实时推流 - 开始推流
      * @param port 端口
@@ -71,89 +78,10 @@ public class ApiStreamController {
                                                         @RequestParam(required = false)String ip,
                                                         @RequestParam()Integer port
     ) {
-        DeferredResult<WVPResult<JSONObject>> resultDeferredResult = new DeferredResult<>(userSetting.getPlayTimeout().longValue() + 10);
+        // 先停止，再启动
+        playService.stop(deviceId, channelId);
 
-        resultDeferredResult.onTimeout(()->{
-            logger.info("等待超时");
-            resultDeferredResult.setResult(WVPResult.fail(ErrorCode.ERROR100.getCode(), "超时"));
-        });
-
-        Device device = storager.queryVideoDevice(deviceId);
-        if (device == null ) {
-            resultDeferredResult.setResult(WVPResult.fail(ErrorCode.ERROR100.getCode(), "device[ " + deviceId + " ]未找到"));
-            return resultDeferredResult;
-        } else if (device.getOnline() == 0) {
-            resultDeferredResult.setResult(WVPResult.fail(ErrorCode.ERROR100.getCode(), "device[ " + channelId + " ]offline"));
-            return resultDeferredResult;
-        }
-
-        DeviceChannel deviceChannel = storager.queryChannel(deviceId, channelId);
-        if (deviceChannel == null) {
-            resultDeferredResult.setResult(WVPResult.fail(ErrorCode.ERROR400.getCode(), "channel[ " + channelId + " ]未找到"));
-            return resultDeferredResult;
-        } else if (deviceChannel.getStatus() == 0) {
-            resultDeferredResult.setResult(WVPResult.fail(ErrorCode.ERROR100.getCode(), "channel[ " + channelId + " ]offline"));
-            return resultDeferredResult;
-        }
-
-        String streamId;
-        MediaServerItem mediaServerItem = playService.getMediaServerItem(device);
-        if (Objects.isNull(mediaServerItem)) {
-            mediaServerItem = playService.newMediaServerItem(10001);
-            if (mediaServerItem.isRtpEnable()) {
-                streamId = String.format("%s_%s", device.getDeviceId(), channelId);
-            } else {
-                streamId = String.format("%s_%s_nonRtp", device.getDeviceId(), channelId);
-            }
-            if (StringUtils.isNoneBlank(ip)) {
-                mediaServerItem.setIp(ip);
-                mediaServerItem.setSdpIp(ip);
-            }
-            mediaServerItem.setPort(port);
-            mediaServerItem.setStream(streamId);
-            mediaServerItem.setSsrc(mediaServerItem.getSsrcConfig().getPlaySsrc());
-        } else {
-            streamId = mediaServerItem.getStream();
-        }
-        playService.play(mediaServerItem, device, channelId, (okEvent) -> {
-            StreamInfo streamInfo = new StreamInfo();
-            streamInfo.setDeviceId(deviceId);
-            streamInfo.setChannelId(channelId);
-            streamInfo.setStream(streamId);
-            streamInfo.setIp(ip);
-            redisCatchStorage.startPlay(streamInfo);
-            storager.startPlay(deviceId, channelId, streamId);
-
-            ResponseEvent responseEvent = (ResponseEvent)okEvent.event;
-            String contentString = new String(responseEvent.getResponse().getRawContent());
-
-            JSONObject result = new JSONObject();
-            // 获取ssrc
-            final String videoSign = "m=video";
-            int videoIndex = contentString.indexOf(videoSign);
-            if (videoIndex >= 0) {
-                String contentVideo = contentString.substring(videoIndex + videoSign.length());
-                contentVideo = contentVideo.replaceAll("^[　 ]+", "");
-                int portEndIndex = contentVideo.indexOf(' ');
-                if (portEndIndex > 0) {
-                    result.put("port", contentVideo.substring(0, portEndIndex));
-                } else {
-                    result.put("port", contentVideo);
-                }
-            }
-            int ssrcIndex = contentString.indexOf("y=");
-            // 检查是否有y字段
-            if (ssrcIndex >= 0) {
-                //ssrc规定长度为10字节，不取余下长度以避免后续还有“f=”字段 TODO 后续对不规范的非10位ssrc兼容
-                String ssrcInResponse = contentString.substring(ssrcIndex + 2, ssrcIndex + 12);
-                result.put("ssrc", ssrcInResponse);
-            }
-            resultDeferredResult.setResult(WVPResult.success(result));
-        }, (eventResult) -> {
-            resultDeferredResult.setResult(WVPResult.fail(ErrorCode.ERROR100.getCode(),
-                    "channel[ " + channelId + " ] " + eventResult.msg));
-        });
-        return resultDeferredResult;
+        return playService.play(deviceId, channelId, ip, port);
     }
 
     /**
@@ -164,23 +92,8 @@ public class ApiStreamController {
      */
     @RequestMapping(value = "/stop")
     @ResponseBody
-    private WVPResult<JSONObject> stop(@RequestParam()String deviceId, @RequestParam()String channelId) {
-        Device device = deviceService.queryDevice(deviceId);
-        if (device == null) {
-            return WVPResult.fail(ErrorCode.ERROR400.getCode(), "device[ " + channelId + " ]未找到设备");
-        }
-        StreamInfo streamInfo = redisCatchStorage.queryPlayByDevice(deviceId, channelId);
-        if (streamInfo == null) {
-            return WVPResult.fail(ErrorCode.ERROR400.getCode(), "stream[ " + channelId + " ]未找到");
-        }
-        try {
-            cmder.streamByeCmd(device, channelId, streamInfo.getStream(), null);
-        } catch (InvalidArgumentException | ParseException | SipException | SsrcTransactionNotFoundException e) {
-            return WVPResult.fail(ErrorCode.ERROR100.getCode(), "发送BYE失败：" + e.getMessage());
-        }
-        redisCatchStorage.stopPlay(streamInfo);
-        storager.stopPlay(streamInfo.getDeviceId(), streamInfo.getChannelId());
-        return WVPResult.success(null);
+    private WVPResult<String> stop(@RequestParam()String deviceId, @RequestParam()String channelId) {
+        return playService.stop(deviceId, channelId);
     }
 
     /**

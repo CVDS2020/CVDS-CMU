@@ -95,7 +95,6 @@ public class ByeRequestProcessor extends SIPRequestProcessorParent implements In
 				param.put("stream",streamId);
 				param.put("ssrc",sendRtpItem.getSsrc());
 				logger.info("[收到bye] 停止向上级推流：{}", streamId);
-				MediaServerItem mediaInfo = mediaServerService.getOne(sendRtpItem.getMediaServerId());
 				redisCatchStorage.deleteSendRTPServer(platformGbId, channelId, callIdHeader.getCallId(), null);
 			}
 			// 可能是设备主动停止
@@ -127,6 +126,5 @@ public class ByeRequestProcessor extends SIPRequestProcessorParent implements In
 					streamSession.remove(device.getDeviceId(), channelId, ssrcTransactionForPlayBack.getStream());
 				}
 			}
-
 	}
 }

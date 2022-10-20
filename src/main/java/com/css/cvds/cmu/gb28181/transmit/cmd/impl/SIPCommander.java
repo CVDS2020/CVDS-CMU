@@ -217,13 +217,11 @@ public class SIPCommander implements ISIPCommander {
         ptzXml.append("</Info>\r\n");
         ptzXml.append("</Control>\r\n");
 
-
         CallIdHeader callIdHeader = device.getTransport().equalsIgnoreCase("TCP") ? tcpSipProvider.getNewCallId()
                 : udpSipProvider.getNewCallId();
 
         SIPRequest request = (SIPRequest) headerProvider.createMessageRequest(device, ptzXml.toString(), SipUtils.getNewViaTag(), SipUtils.getNewFromTag(), null, callIdHeader);
         transmitRequest(device.getTransport(), request);
-
     }
 
     /**

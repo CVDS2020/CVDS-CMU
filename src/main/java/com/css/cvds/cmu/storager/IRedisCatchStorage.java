@@ -41,25 +41,13 @@ public interface IRedisCatchStorage {
 
     boolean stopPlayback(String deviceId, String channelId, String stream, String callId);
 
-    StreamInfo queryPlayback(String deviceId, String channelID, String stream, String callId);
-
-    void updatePlatformCatchInfo(ParentPlatformCatch parentPlatformCatch);
-
     ParentPlatformCatch queryPlatformCatchInfo(String platformGbId);
-
-    void delPlatformCatchInfo(String platformGbId);
-
-    void delPlatformKeepalive(String platformGbId);
-
-    void delPlatformRegister(String platformGbId);
 
     void updatePlatformRegisterInfo(String callId, PlatformRegisterInfo platformRegisterInfo);
 
     PlatformRegisterInfo queryPlatformRegisterInfo(String callId);
 
     void delPlatformRegisterInfo(String callId);
-
-    void updateSendRTPSever(SendRtpItem sendRtpItem);
 
     /**
      * 查询RTP推送信息缓存
@@ -68,8 +56,6 @@ public interface IRedisCatchStorage {
      * @return sendRtpItem
      */
     SendRtpItem querySendRTPServer(String platformGbId, String channelId, String streamId, String callId);
-
-    List<SendRtpItem> querySendRTPServer(String platformGbId);
 
     /**
      * 删除RTP推送信息缓存
@@ -96,20 +82,6 @@ public interface IRedisCatchStorage {
     void sendAlarmMsg(AlarmChannelMessage msg);
 
     /**
-     * 移除流信息从redis
-     * @param mediaServerId
-     * @param app
-     * @param streamId
-     */
-    void removeStream(String mediaServerId, String type, String app, String streamId);
-
-    /**
-     * 移除流信息从redis
-     * @param mediaServerId
-     */
-    void removeStream(String mediaServerId, String type);
-
-    /**
      * 开始下载录像时存入
      * @param streamInfo
      */
@@ -125,8 +97,6 @@ public interface IRedisCatchStorage {
      */
     void updateDevice(Device device);
 
-    void removeDevice(String deviceId);
-
     /**
      * 获取Device
      */
@@ -136,10 +106,7 @@ public interface IRedisCatchStorage {
 
     void updateGpsMsgInfo(GPSMsgInfo gpsMsgInfo);
 
-    GPSMsgInfo getGpsMsgInfo(String gbId);
     List<GPSMsgInfo> getAllGpsMsgInfo();
-
-    Long getSN(String method);
 
     void addCpuInfo(double cpuInfo);
 
@@ -148,8 +115,6 @@ public interface IRedisCatchStorage {
     void addNetInfo(Map<String, String> networkInterfaces);
 
     void sendMobilePositionMsg(JSONObject jsonObject);
-
-    void sendStreamPushRequestedMsg(MessageForPushChannel messageForPushChannel);
 
     /**
      * 判断设备状态

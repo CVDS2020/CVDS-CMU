@@ -56,7 +56,6 @@ public interface IVideoManagerStorage {
 	
 	List<DeviceChannel> queryChannelsByDeviceIdWithStartAndLimit(String deviceId, String query, Boolean hasSubChannel, Boolean online, int start, int limit);
 
-
 	/**
 	 * 获取某个设备的通道列表
 	 *
@@ -71,12 +70,6 @@ public interface IVideoManagerStorage {
 	 * @param channelId 通道ID
 	 */
 	DeviceChannel queryChannel(String deviceId, String channelId);
-
-	/**
-	 * 获取某个设备的通道
-	 * @param channelId 通道ID
-	 */
-	DeviceChannel queryChannelByChannelId(String channelId);
 
 	/**
 	 * 删除通道

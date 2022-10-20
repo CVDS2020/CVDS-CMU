@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
+import javax.annotation.Resource;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -45,11 +46,10 @@ public class VideoManagerStorageImpl implements IVideoManagerStorage {
 	@Autowired
 	SipConfig sipConfig;
 
-
-	@Autowired
+	@Resource
 	TransactionDefinition transactionDefinition;
 
-	@Autowired
+	@Resource
 	DataSourceTransactionManager dataSourceTransactionManager;
 
 	@Autowired
@@ -152,7 +152,8 @@ public class VideoManagerStorageImpl implements IVideoManagerStorage {
 				//事务回滚
 				dataSourceTransactionManager.rollback(transactionStatus);
 			}
-			dataSourceTransactionManager.commit(transactionStatus);     //手动提交
+			// 手动提交
+			dataSourceTransactionManager.commit(transactionStatus);
 			return true;
 		}catch (Exception e) {
 			e.printStackTrace();
@@ -229,15 +230,6 @@ public class VideoManagerStorageImpl implements IVideoManagerStorage {
 	@Override
 	public DeviceChannel queryChannel(String deviceId, String channelId) {
 		return deviceChannelMapper.queryChannel(deviceId, channelId);
-	}
-
-	@Override
-	public DeviceChannel queryChannelByChannelId(String channelId) {
-		List<DeviceChannel> list = deviceChannelMapper.queryChannelByChannelId(channelId);
-		if (!CollectionUtils.isEmpty(list)) {
-			return list.get(0);
-		}
-		return null;
 	}
 
 	@Override

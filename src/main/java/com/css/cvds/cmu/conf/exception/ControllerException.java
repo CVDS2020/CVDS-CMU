@@ -1,6 +1,6 @@
 package com.css.cvds.cmu.conf.exception;
 
-import com.css.cvds.cmu.vmanager.bean.ErrorCode;
+import com.css.cvds.cmu.web.bean.ErrorCode;
 
 /**
  * 自定义异常，controller出现错误时直接抛出异常由全局异常捕获并返回结果

@@ -1,71 +1,34 @@
 package com.css.cvds.cmu.storager.dao.dto;
 
+import java.util.Date;
+
+/**
+ * @author chend
+ */
 public class LogDto {
 
-    private int id;
-    private String name;
-    private String type;
-    private String uri;
-    private String address;
-    private String result;
-    private long timing;
+    private long id;
+    private int type;
+    private String title;
+    private String content;
+    private int userId;
     private String username;
-    private String createTime;
+    private Date createTime;
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getType() {
+    public int getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(int type) {
         this.type = type;
-    }
-
-    public String getUri() {
-        return uri;
-    }
-
-    public void setUri(String uri) {
-        this.uri = uri;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public String getResult() {
-        return result;
-    }
-
-    public void setResult(String result) {
-        this.result = result;
-    }
-
-    public long getTiming() {
-        return timing;
-    }
-
-    public void setTiming(long timing) {
-        this.timing = timing;
     }
 
     public String getUsername() {
@@ -76,11 +39,35 @@ public class LogDto {
         this.username = username;
     }
 
-    public String getCreateTime() {
+    public Date getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(String createTime) {
+    public void setCreateTime(Date createTime) {
         this.createTime = createTime;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 }

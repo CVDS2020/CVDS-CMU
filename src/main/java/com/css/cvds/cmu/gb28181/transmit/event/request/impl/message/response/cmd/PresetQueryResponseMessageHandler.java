@@ -9,7 +9,7 @@ import com.css.cvds.cmu.gb28181.transmit.event.request.SIPRequestProcessorParent
 import com.css.cvds.cmu.gb28181.transmit.event.request.impl.message.IMessageHandler;
 import com.css.cvds.cmu.gb28181.transmit.event.request.impl.message.response.ResponseMessageHandler;
 import com.css.cvds.cmu.gb28181.utils.XmlUtil;
-import com.css.cvds.cmu.gb28181.bean.*;
+import com.css.cvds.cmu.web.bean.WVPResult;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.slf4j.Logger;
@@ -93,7 +93,7 @@ public class PresetQueryResponseMessageHandler extends SIPRequestProcessorParent
             }
             RequestMessage requestMessage = new RequestMessage();
             requestMessage.setKey(key);
-            requestMessage.setData(presetQuerySipReqList);
+            requestMessage.setData(WVPResult.success(presetQuerySipReqList));
             deferredResultHolder.invokeAllResult(requestMessage);
             responseAck(serverTransaction, Response.OK);
         } catch (DocumentException e) {

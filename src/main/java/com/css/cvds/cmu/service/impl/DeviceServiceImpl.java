@@ -15,7 +15,7 @@ import com.css.cvds.cmu.storager.IRedisCatchStorage;
 import com.css.cvds.cmu.storager.dao.DeviceChannelMapper;
 import com.css.cvds.cmu.storager.dao.DeviceMapper;
 import com.css.cvds.cmu.utils.DateUtil;
-import com.css.cvds.cmu.vmanager.bean.BaseTree;
+import com.css.cvds.cmu.web.bean.BaseTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

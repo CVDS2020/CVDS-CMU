@@ -1,7 +1,7 @@
 package com.css.cvds.cmu.conf.security;
 
 import com.alibaba.fastjson.JSONObject;
-import com.css.cvds.cmu.vmanager.bean.ErrorCode;
+import com.css.cvds.cmu.web.bean.ErrorCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.AuthenticationException;

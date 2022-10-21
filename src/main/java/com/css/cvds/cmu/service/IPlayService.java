@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.css.cvds.cmu.gb28181.bean.Device;
 import com.css.cvds.cmu.gb28181.event.SipSubscribe;
 import com.css.cvds.cmu.media.css.MediaServerItem;
-import com.css.cvds.cmu.vmanager.bean.WVPResult;
+import com.css.cvds.cmu.web.bean.WVPResult;
 import org.springframework.web.context.request.async.DeferredResult;
 
 /**

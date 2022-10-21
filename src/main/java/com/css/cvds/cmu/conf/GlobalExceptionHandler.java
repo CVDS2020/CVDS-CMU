@@ -1,8 +1,8 @@
 package com.css.cvds.cmu.conf;
 
 import com.css.cvds.cmu.conf.exception.ControllerException;
-import com.css.cvds.cmu.vmanager.bean.ErrorCode;
-import com.css.cvds.cmu.vmanager.bean.WVPResult;
+import com.css.cvds.cmu.web.bean.ErrorCode;
+import com.css.cvds.cmu.web.bean.WVPResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;

@@ -1,7 +1,7 @@
 package com.css.cvds.cmu.conf;
 
 import com.css.cvds.cmu.conf.security.SecurityUtils;
-import com.css.cvds.cmu.storager.dao.dto.LogDto;
+import com.css.cvds.cmu.storager.dao.dto.AccessLogDto;
 import com.css.cvds.cmu.utils.DateUtil;
 import com.css.cvds.cmu.common.ApiSaveConstant;
 import com.css.cvds.cmu.service.ILogService;
@@ -48,16 +48,16 @@ public class ApiAccessFilter extends OncePerRequestFilter {
         filterChain.doFilter(servletRequest, servletResponse);
 
         if (uriName != null && userSetting.getLogInDatabase()) {
-            LogDto logDto = new LogDto();
-            logDto.setName(uriName);
-            logDto.setUsername(username);
-            logDto.setAddress(servletRequest.getRemoteAddr());
-            logDto.setResult(HttpStatus.valueOf(servletResponse.getStatus()).toString());
-            logDto.setTiming(System.currentTimeMillis() - start);
-            logDto.setType(servletRequest.getMethod());
-            logDto.setUri(servletRequest.getRequestURI());
-            logDto.setCreateTime(DateUtil.getNow());
-            logService.add(logDto);
+            AccessLogDto accessLogDto = new AccessLogDto();
+            accessLogDto.setName(uriName);
+            accessLogDto.setUsername(username);
+            accessLogDto.setAddress(servletRequest.getRemoteAddr());
+            accessLogDto.setResult(HttpStatus.valueOf(servletResponse.getStatus()).toString());
+            accessLogDto.setTiming(System.currentTimeMillis() - start);
+            accessLogDto.setType(servletRequest.getMethod());
+            accessLogDto.setUri(servletRequest.getRequestURI());
+            accessLogDto.setCreateTime(DateUtil.getNow());
+            logService.addAccessLog(accessLogDto);
         }
     }
 

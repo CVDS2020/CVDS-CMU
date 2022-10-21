@@ -9,6 +9,7 @@ import com.css.cvds.cmu.gb28181.transmit.event.request.SIPRequestProcessorParent
 import com.css.cvds.cmu.gb28181.transmit.event.request.impl.message.IMessageHandler;
 import com.css.cvds.cmu.gb28181.transmit.event.request.impl.message.response.ResponseMessageHandler;
 import com.css.cvds.cmu.gb28181.utils.XmlUtil;
+import com.css.cvds.cmu.web.bean.WVPResult;
 import org.dom4j.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +55,7 @@ public class DeviceControlResponseMessageHandler extends SIPRequestProcessorPare
             RequestMessage msg = new RequestMessage();
             String key = DeferredResultHolder.CALLBACK_CMD_DEVICECONTROL +  device.getDeviceId() + channelId;
             msg.setKey(key);
-            msg.setData(json);
+            msg.setData(WVPResult.success(json));
             deferredResultHolder.invokeAllResult(msg);
         } catch (SipException | InvalidArgumentException | ParseException e) {
             logger.error("[命令发送失败] 国标级联 设备控制: {}", e.getMessage());

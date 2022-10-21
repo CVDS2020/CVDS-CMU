@@ -2,9 +2,9 @@ package com.css.cvds.cmu.gb28181.session;
 
 import com.css.cvds.cmu.gb28181.bean.RecordInfo;
 import com.css.cvds.cmu.gb28181.bean.RecordItem;
-import com.css.cvds.cmu.gb28181.bean.*;
 import com.css.cvds.cmu.gb28181.transmit.callback.DeferredResultHolder;
 import com.css.cvds.cmu.gb28181.transmit.callback.RequestMessage;
+import com.css.cvds.cmu.web.bean.WVPResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -66,7 +66,7 @@ public class RecordDataCatch {
 
                 RequestMessage msg = new RequestMessage();
                 msg.setKey(msgKey);
-                msg.setData(recordInfo);
+                msg.setData(WVPResult.success(recordInfo));
                 deferredResultHolder.invokeAllResult(msg);
                 data.remove(key);
             }

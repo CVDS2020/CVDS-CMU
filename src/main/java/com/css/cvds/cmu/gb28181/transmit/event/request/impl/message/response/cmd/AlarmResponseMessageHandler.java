@@ -9,6 +9,7 @@ import com.css.cvds.cmu.gb28181.transmit.event.request.SIPRequestProcessorParent
 import com.css.cvds.cmu.gb28181.transmit.event.request.impl.message.IMessageHandler;
 import com.css.cvds.cmu.gb28181.transmit.event.request.impl.message.response.ResponseMessageHandler;
 import com.css.cvds.cmu.gb28181.utils.XmlUtil;
+import com.css.cvds.cmu.web.bean.WVPResult;
 import org.dom4j.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +48,7 @@ public class AlarmResponseMessageHandler extends SIPRequestProcessorParent imple
         }
         RequestMessage msg = new RequestMessage();
         msg.setKey(key);
-        msg.setData(json);
+        msg.setData(WVPResult.success(json));
         deferredResultHolder.invokeAllResult(msg);
     }
 

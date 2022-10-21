@@ -11,6 +11,7 @@ import com.css.cvds.cmu.gb28181.transmit.event.request.impl.message.response.Res
 import com.css.cvds.cmu.gb28181.utils.XmlUtil;
 import com.css.cvds.cmu.service.IDeviceService;
 import com.css.cvds.cmu.storager.IRedisCatchStorage;
+import com.css.cvds.cmu.web.bean.WVPResult;
 import org.dom4j.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,7 +77,7 @@ public class DeviceStatusResponseMessageHandler extends SIPRequestProcessorParen
         }
         RequestMessage msg = new RequestMessage();
         msg.setKey(DeferredResultHolder.CALLBACK_CMD_DEVICESTATUS + device.getDeviceId());
-        msg.setData(json);
+        msg.setData(WVPResult.success(json));
         deferredResultHolder.invokeAllResult(msg);
     }
 

@@ -53,7 +53,7 @@ CREATE TABLE `device` (
     `treeType` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
     PRIMARY KEY (`id`),
     UNIQUE KEY `device_deviceId_uindex` (`deviceId`)
-) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -146,7 +146,7 @@ CREATE TABLE `device_channel` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `device_channel_id_uindex` (`id`),
   UNIQUE KEY `device_channel_pk` (`channelId`,`deviceId`)
-) ENGINE=InnoDB AUTO_INCREMENT=60163 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -183,7 +183,7 @@ CREATE TABLE `device_mobile_position` (
   `latitudeWgs84` double DEFAULT NULL,
   `createTime` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=55589 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -199,10 +199,10 @@ UNLOCK TABLES;
 -- Table structure for table `log`
 --
 
-DROP TABLE IF EXISTS `log`;
+DROP TABLE IF EXISTS `access_log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `log` (
+CREATE TABLE `access_log` (
    `id` bigint NOT NULL AUTO_INCREMENT,
    `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
    `type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
@@ -213,7 +213,7 @@ CREATE TABLE `log` (
    `username` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
    `createTime` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
    PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=727574 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -243,7 +243,7 @@ CREATE TABLE `user` (
     `updateTime` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
     PRIMARY KEY (`id`) USING BTREE,
     UNIQUE KEY `user_username_uindex` (`username`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=100 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -270,7 +270,7 @@ CREATE TABLE `user_role` (
      `createTime` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
      `updateTime` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
      PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -311,3 +311,59 @@ CREATE TABLE `storage_plan` (
     `directory` varchar(255) NOT NULL COMMENT '存储目录',
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='存储计划表';
+
+-- 监视目标 --
+DROP TABLE IF EXISTS `supervise_target`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `supervise_target`  (
+    `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'ID',
+    `name` varchar(100) NOT NULL COMMENT '监视物名称',
+    `type` INTEGER NOT NULL DEFAULT 1 COMMENT '类型：1：转向架，2：受电弓，3，车厢',
+    `trainId` int(11) NOT NULL COMMENT '监视物所在机车，train.ID',
+    `carriage` varchar(100) NOT NULL COMMENT '监视物所在车厢',
+    `address` varchar(255) DEFAULT NULL COMMENT '安装位置',
+    `longitude` float DEFAULT NULL COMMENT '经度',
+    `latitude` float DEFAULT NULL COMMENT '纬度',
+    `status`int(11) DEFAULT NULL COMMENT '状态，0-正常，转向架异常（1-温度异常，2-检测到异物，3-部件缺失），受电弓姿态异常（100-降弓，101-升弓），受电弓实体异常（201-受电弓燃弧、202-受电弓异物、203-受电弓变形、204-右弓角缺失、205-左弓角缺失），受电弓温度异常（300-受电弓温度异常，statusText字段补充温度范围）',
+    `statusText` varchar(255) DEFAULT NULL COMMENT '状态描述',
+    `description` varchar(255) DEFAULT NULL COMMENT '备注',
+    PRIMARY KEY (`id`) USING BTREE,
+    UNIQUE KEY `unique_name` (`name`) USING BTREE
+) ENGINE = InnoDB DEFAULT CHARSET=utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic COMMENT = '监视目标';
+
+-- 日志 --
+CREATE TABLE `log`  (
+    `id` bigint NOT NULL AUTO_INCREMENT COMMENT 'ID',
+    `type` int(11) NOT NULL COMMENT '日志类型：0-系统日志，1-操作日志',
+    `userId` int(11) DEFAULT 0 COMMENT '用户ID，0-表示系统',
+    `title` varchar(100) NOT NULL COMMENT '标题',
+    `content` varchar(255) NOT NULL COMMENT '日志内容',
+    `createTime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    PRIMARY KEY (`id`) USING BTREE,
+    INDEX `idx_title`(`title`) USING BTREE,
+    INDEX `idx_type`(`type`) USING BTREE
+) ENGINE = InnoDB DEFAULT CHARSET=utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic COMMENT = '日志';
+
+-- 机车信息 --
+CREATE TABLE `train`  (
+    `id` int NOT NULL AUTO_INCREMENT COMMENT 'ID',
+    `serial` varchar(100) NOT NULL COMMENT '机车号',
+    `trainNo` varchar(100) NOT NULL COMMENT '车次',
+    `name` varchar(255) NOT NULL COMMENT '名称',
+    `description` varchar(255) DEFAULT NULL COMMENT '备注',
+    PRIMARY KEY (`id`) USING BTREE,
+    UNIQUE KEY `unique_serial` (`serial`) USING BTREE,
+    UNIQUE KEY `unique_trainNo` (`trainNo`) USING BTREE
+) ENGINE = InnoDB DEFAULT CHARSET=utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic COMMENT = '机车信息';
+
+--
+-- Dumping data for table `train`
+--
+
+LOCK TABLES `train` WRITE;
+/*!40000 ALTER TABLE `user_role` DISABLE KEYS */;
+INSERT INTO `train` VALUES (1, '未定义', '未定义', '未定义', '');
+/*!40000 ALTER TABLE `user_role` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

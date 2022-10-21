@@ -3,7 +3,7 @@ package com.css.cvds.cmu.service;
 import com.css.cvds.cmu.gb28181.bean.Device;
 import com.css.cvds.cmu.gb28181.bean.DeviceChannel;
 import com.css.cvds.cmu.gb28181.bean.SyncStatus;
-import com.css.cvds.cmu.vmanager.bean.BaseTree;
+import com.css.cvds.cmu.web.bean.BaseTree;
 
 import java.util.List;
 

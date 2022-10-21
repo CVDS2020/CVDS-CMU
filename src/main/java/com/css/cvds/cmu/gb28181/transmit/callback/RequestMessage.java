@@ -1,6 +1,8 @@
 package com.css.cvds.cmu.gb28181.transmit.callback;
 
-/**    
+import com.css.cvds.cmu.web.bean.WVPResult;
+
+/**
  * @description: 请求信息定义   
  * @author: swwheihei
  * @date:   2020年5月8日 下午1:09:18     
@@ -11,7 +13,7 @@ public class RequestMessage {
 
 	private String key;
 
-	private Object data;
+	private WVPResult<Object> data;
 
 	public String getId() {
 		return id;
@@ -33,7 +35,11 @@ public class RequestMessage {
 		return data;
 	}
 
-	public void setData(Object data) {
+	public void setData(WVPResult<Object> data) {
 		this.data = data;
+	}
+
+	public void setError(String msg) {
+		this.data = WVPResult.fail(msg);
 	}
 }

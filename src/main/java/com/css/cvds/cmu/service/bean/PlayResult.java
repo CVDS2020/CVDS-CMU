@@ -1,7 +1,7 @@
 package com.css.cvds.cmu.service.bean;
 
 import com.css.cvds.cmu.gb28181.bean.Device;
-import com.css.cvds.cmu.vmanager.bean.WVPResult;
+import com.css.cvds.cmu.web.bean.WVPResult;
 import org.springframework.web.context.request.async.DeferredResult;
 
 public class PlayResult {

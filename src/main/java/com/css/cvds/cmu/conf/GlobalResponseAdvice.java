@@ -2,8 +2,8 @@ package com.css.cvds.cmu.conf;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter;
-import com.css.cvds.cmu.vmanager.bean.ErrorCode;
-import com.css.cvds.cmu.vmanager.bean.WVPResult;
+import com.css.cvds.cmu.web.bean.ErrorCode;
+import com.css.cvds.cmu.web.bean.WVPResult;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.context.annotation.Bean;

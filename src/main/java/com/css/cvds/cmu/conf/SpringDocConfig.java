@@ -39,23 +39,31 @@ public class SpringDocConfig {
     public GroupedOpenApi publicApi() {
         return GroupedOpenApi.builder()
                 .group("1. 全部")
-                .packagesToScan("com.css.cvds.cmu.vmanager")
+                .packagesToScan("com.css.cvds.cmu.web")
                 .build();
     }
 
     @Bean
     public GroupedOpenApi publicApi2() {
         return GroupedOpenApi.builder()
-                .group("2. 国标28181")
-                .packagesToScan("com.css.cvds.cmu.vmanager.gb28181")
+                .group("2. 28181")
+                .packagesToScan("com.css.cvds.cmu.web.gb28181")
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi publicApi3() {
+        return GroupedOpenApi.builder()
+                .group("3. 服务")
+                .packagesToScan("com.css.cvds.cmu.web.server")
                 .build();
     }
 
     @Bean
     public GroupedOpenApi publicApi5() {
         return GroupedOpenApi.builder()
-                .group("4. 服务管理")
-                .packagesToScan("com.css.cvds.cmu.vmanager.server")
+                .group("4. 日志")
+                .packagesToScan("com.css.cvds.cmu.web.log")
                 .build();
     }
 
@@ -63,7 +71,39 @@ public class SpringDocConfig {
     public GroupedOpenApi publicApi6() {
         return GroupedOpenApi.builder()
                 .group("5. 用户管理")
-                .packagesToScan("com.css.cvds.cmu.vmanager.user")
+                .packagesToScan("com.css.cvds.cmu.web.user")
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi publicApi7() {
+        return GroupedOpenApi.builder()
+                .group("6. 流")
+                .packagesToScan("com.css.cvds.cmu.web.stream")
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi publicApi8() {
+        return GroupedOpenApi.builder()
+                .group("7. 列车")
+                .packagesToScan("com.css.cvds.cmu.web.stream")
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi publicApi9() {
+        return GroupedOpenApi.builder()
+                .group("8. 列车")
+                .packagesToScan("com.css.cvds.cmu.web.user")
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi publicApi10() {
+        return GroupedOpenApi.builder()
+                .group("9. 录像")
+                .packagesToScan("com.css.cvds.cmu.web.record")
                 .build();
     }
 }

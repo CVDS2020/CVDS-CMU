@@ -13,6 +13,7 @@ import com.css.cvds.cmu.gb28181.utils.XmlUtil;
 import com.css.cvds.cmu.service.IDeviceService;
 import com.css.cvds.cmu.storager.IRedisCatchStorage;
 import com.css.cvds.cmu.storager.IVideoManagerStorage;
+import com.css.cvds.cmu.web.bean.WVPResult;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.slf4j.Logger;
@@ -95,7 +96,7 @@ public class DeviceInfoResponseMessageHandler extends SIPRequestProcessorParent 
 
             RequestMessage msg = new RequestMessage();
             msg.setKey(key);
-            msg.setData(device);
+            msg.setData(WVPResult.success(device));
             deferredResultHolder.invokeAllResult(msg);
             // 回复200 OK
             responseAck(serverTransaction, Response.OK);

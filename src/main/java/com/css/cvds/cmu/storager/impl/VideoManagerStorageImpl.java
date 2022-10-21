@@ -3,15 +3,10 @@ package com.css.cvds.cmu.storager.impl;
 import com.css.cvds.cmu.gb28181.bean.*;
 import com.css.cvds.cmu.storager.dao.*;
 import com.css.cvds.cmu.utils.DateUtil;
-import com.css.cvds.cmu.vmanager.gb28181.platform.bean.ChannelReduce;
 import com.css.cvds.cmu.conf.SipConfig;
-import com.css.cvds.cmu.conf.UserSetting;
 import com.css.cvds.cmu.gb28181.event.EventPublisher;
-import com.css.cvds.cmu.gb28181.event.subscribe.catalog.CatalogEvent;
-import com.css.cvds.cmu.service.bean.GPSMsgInfo;
 import com.css.cvds.cmu.storager.IRedisCatchStorage;
 import com.css.cvds.cmu.storager.IVideoManagerStorage;
-import com.css.cvds.cmu.storager.dao.dto.ChannelSourceInfo;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -21,7 +16,6 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
@@ -195,7 +189,7 @@ public class VideoManagerStorageImpl implements IVideoManagerStorage {
 	}
 
 	@Override
-	public PageInfo queryChannelsByDeviceId(String deviceId, String query, Boolean hasSubChannel, Boolean online, Boolean catalogUnderDevice, int page, int count) {
+	public PageInfo<DeviceChannel> queryChannelsByDeviceId(String deviceId, String query, Boolean hasSubChannel, Boolean online, Boolean catalogUnderDevice, int page, int count) {
 		// 获取到所有正在播放的流
 		PageHelper.startPage(page, count);
 		List<DeviceChannel> all;

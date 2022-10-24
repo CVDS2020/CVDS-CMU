@@ -253,7 +253,6 @@ public class SIPCommander implements ISIPCommander {
 
         Request request = headerProvider.createMessageRequest(device, ptzXml.toString(), SipUtils.getNewViaTag(), SipUtils.getNewFromTag(), null, callIdHeader);
         transmitRequest(device.getTransport(), request, errorEvent, okEvent);
-
     }
 
     /**

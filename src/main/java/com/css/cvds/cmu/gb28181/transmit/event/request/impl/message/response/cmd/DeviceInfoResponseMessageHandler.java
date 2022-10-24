@@ -14,6 +14,7 @@ import com.css.cvds.cmu.service.IDeviceService;
 import com.css.cvds.cmu.storager.IRedisCatchStorage;
 import com.css.cvds.cmu.storager.IVideoManagerStorage;
 import com.css.cvds.cmu.web.bean.WVPResult;
+import org.apache.logging.log4j.util.Strings;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.slf4j.Logger;
@@ -89,8 +90,8 @@ public class DeviceInfoResponseMessageHandler extends SIPRequestProcessorParent 
             device.setManufacturer(XmlUtil.getText(rootElement, "Manufacturer"));
             device.setModel(XmlUtil.getText(rootElement, "Model"));
             device.setFirmware(XmlUtil.getText(rootElement, "Firmware"));
-            if (ObjectUtils.isEmpty(device.getStreamMode())) {
-                device.setStreamMode("UDP");
+            if (Strings.isEmpty(device.getStreamMode())) {
+                device.setStreamMode("TCP-PASSIVE");
             }
             deviceService.updateDevice(device);
 

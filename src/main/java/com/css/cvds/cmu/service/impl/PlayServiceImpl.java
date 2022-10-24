@@ -205,6 +205,7 @@ public class PlayServiceImpl implements IPlayService {
                 String ssrcInResponse = contentString.substring(ssrcIndex + 2, ssrcIndex + 12);
                 result.put("ssrc", ssrcInResponse);
             }
+            result.put("sdp", contentString);
             resultDeferredResult.setResult(WVPResult.success(result));
         }, (eventResult) -> {
             resultDeferredResult.setResult(WVPResult.fail(ErrorCode.ERROR100.getCode(),

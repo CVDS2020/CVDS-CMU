@@ -1,9 +1,7 @@
 package com.css.cvds.cmu.conf.redis;
 
-
 import com.alibaba.fastjson.parser.ParserConfig;
 import com.css.cvds.cmu.common.VideoManagerConstants;
-import com.css.cvds.cmu.service.redisMsg.*;
 import com.css.cvds.cmu.service.redisMsg.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CachingConfigurerSupport;
@@ -16,7 +14,6 @@ import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import com.css.cvds.cmu.utils.redis.FastJsonRedisSerializer;
-
 
 /**
  * @description:Redis中间件配置类，使用spring-data-redis集成，自动从application.yml中加载redis配置

@@ -96,6 +96,11 @@ public class DeviceAlarm {
 	@Schema(description = "创建时间")
 	private String createTime;
 
+	@Schema(description = "处理时间，空表示未处理")
+	private String alreadyTime;
+
+	@Schema(description = "处理人ID")
+	private Integer alreadyUser;
 
 	public String getId() {
 		return id;
@@ -183,5 +188,21 @@ public class DeviceAlarm {
 
 	public void setCreateTime(String createTime) {
 		this.createTime = createTime;
+	}
+
+	public String getAlreadyTime() {
+		return alreadyTime;
+	}
+
+	public void setAlreadyTime(String alreadyTime) {
+		this.alreadyTime = alreadyTime;
+	}
+
+	public Integer getAlreadyUser() {
+		return alreadyUser;
+	}
+
+	public void setAlreadyUser(Integer alreadyUser) {
+		this.alreadyUser = alreadyUser;
 	}
 }

@@ -2,11 +2,14 @@ package com.css.cvds.cmu.storager.impl;
 
 import com.css.cvds.cmu.gb28181.bean.*;
 import com.css.cvds.cmu.storager.dao.*;
+import com.css.cvds.cmu.utils.CollectUtils;
 import com.css.cvds.cmu.utils.DateUtil;
 import com.css.cvds.cmu.conf.SipConfig;
 import com.css.cvds.cmu.gb28181.event.EventPublisher;
 import com.css.cvds.cmu.storager.IRedisCatchStorage;
 import com.css.cvds.cmu.storager.IVideoManagerStorage;
+import com.css.cvds.cmu.web.bean.DeviceVO;
+import com.css.cvds.cmu.web.converter.DeviceConverter;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -189,36 +192,8 @@ public class VideoManagerStorageImpl implements IVideoManagerStorage {
 	}
 
 	@Override
-	public PageInfo<DeviceChannel> queryChannelsByDeviceId(String deviceId, String query, Boolean hasSubChannel, Boolean online, Boolean catalogUnderDevice, int page, int count) {
-		// 获取到所有正在播放的流
-		PageHelper.startPage(page, count);
-		List<DeviceChannel> all;
-		if (catalogUnderDevice != null && catalogUnderDevice) {
-			all = deviceChannelMapper.queryChannels(deviceId, deviceId, query, hasSubChannel, online);
-			// 海康设备的parentId是SIP id
-			List<DeviceChannel> deviceChannels = deviceChannelMapper.queryChannels(deviceId, sipConfig.getId(), query, hasSubChannel, online);
-			all.addAll(deviceChannels);
-		}else {
-			all = deviceChannelMapper.queryChannels(deviceId, null, query, hasSubChannel, online);
-		}
-		return new PageInfo<>(all);
-	}
-
-	@Override
-	public List<DeviceChannel> queryChannelsByDeviceIdWithStartAndLimit(String deviceId, String query, Boolean hasSubChannel, Boolean online, int start, int limit) {
-		return deviceChannelMapper.queryChannelsByDeviceIdWithStartAndLimit(deviceId, null, query, hasSubChannel, online, start, limit);
-	}
-
-	@Override
 	public List<DeviceChannel> queryChannelsByDeviceId(String deviceId) {
 		return deviceChannelMapper.queryChannels(deviceId, null,null, null, null);
-	}
-
-	@Override
-	public PageInfo<DeviceChannel> querySubChannels(String deviceId, String parentChannelId, String query, Boolean hasSubChannel, Boolean online, int page, int count) {
-		PageHelper.startPage(page, count);
-		List<DeviceChannel> all = deviceChannelMapper.queryChannels(deviceId, parentChannelId, query, hasSubChannel, online);
-		return new PageInfo<>(all);
 	}
 
 	@Override
@@ -240,22 +215,19 @@ public class VideoManagerStorageImpl implements IVideoManagerStorage {
 	 */
 	@Override
 	public PageInfo<Device> queryVideoDeviceList(int page, int count,
-												 String keyword, Boolean online, Integer superviseTargetId) {
+												 String keyword, Boolean online, Integer carriageNo, Integer superviseTargetType) {
 		PageHelper.startPage(page, count);
-		List<Device> all = deviceMapper.getDevices(keyword, online, superviseTargetId);
+		List<Device> all = deviceMapper.getDevices(keyword, online, carriageNo, superviseTargetType);
 		return new PageInfo<>(all);
 	}
 
-	/**
-	 * 获取多个设备
-	 *
-	 * @return List<Device> 设备对象数组
-	 */
 	@Override
-	public List<Device> queryVideoDeviceList() {
-
-		List<Device> deviceList =  deviceMapper.getDevices(null, null, null);
-		return deviceList;
+	public PageInfo<DeviceVO> queryDeviceList(int page, int count,
+									   String keyword, Boolean online, Integer carriageNo, Integer superviseTargetType) {
+		PageHelper.startPage(page, count);
+		List<Device> all = deviceMapper.getDevices(keyword, online, carriageNo, superviseTargetType);
+		List<DeviceVO> voList = CollectUtils.toList(all, DeviceConverter.INSTANCE::toVo);
+		return new PageInfo<>(voList);
 	}
 
 	/**

@@ -659,13 +659,7 @@ public class SIPCommanderFroPlatform implements ISIPCommanderForPlatform {
 
     @Override
     public void streamByeCmd(ParentPlatform platform, String callId) throws SipException, InvalidArgumentException, ParseException {
-        if (platform == null) {
-            return;
-        }
-        SendRtpItem sendRtpItem = redisCatchStorage.querySendRTPServer(platform.getServerGBId(), null, null, callId);
-        if (sendRtpItem != null) {
-            streamByeCmd(platform, sendRtpItem);
-        }
+
     }
 
     @Override

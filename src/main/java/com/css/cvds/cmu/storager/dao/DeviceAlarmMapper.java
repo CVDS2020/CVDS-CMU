@@ -1,5 +1,6 @@
 package com.css.cvds.cmu.storager.dao;
 
+import com.css.cvds.cmu.gb28181.bean.Device;
 import com.css.cvds.cmu.gb28181.bean.DeviceAlarm;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
@@ -26,10 +27,12 @@ public interface DeviceAlarmMapper {
             " <if test=\"alarmType != null\" >  AND alarmType = '${alarmType}' </if>" +
             " <if test=\"startTime != null\" >  AND alarmTime &gt;= '${startTime}' </if>" +
             " <if test=\"endTime != null\" >  AND alarmTime &lt;= '${endTime}' </if>" +
+            " <if test=\"already != null and already\" >  AND (alreadyTime != null AND alreadyTime != '') </if>" +
+            " <if test=\"already != null and !already\" >  AND (alreadyTime == null OR alreadyTime == '') </if>" +
             " ORDER BY alarmTime ASC " +
             " </script>"})
     List<DeviceAlarm> query(String deviceId, String alarmPriority, String alarmMethod,
-                            String alarmType, String startTime, String endTime);
+                            String alarmType, String startTime, String endTime, Boolean already);
 
 
     @Delete(" <script>" +
@@ -41,5 +44,8 @@ public interface DeviceAlarmMapper {
             " <if test=\"id != null\" > AND id = ${id}</if>" +
             " </script>"
             )
-    int clearAlarmBeforeTime(Integer id, List<String> deviceIdList, String time);
+    int clearAlarmBeforeTime(Long id, List<String> deviceIdList, String time);
+
+    @Update(value = {"UPDATE device_alarm SET alreadyUser=#{alreadyUser}, alreadyTime=#{alreadyTime} WHERE id=#{id}"})
+    int updateAlready(Long id, Integer alreadyUser, String alreadyTime);
 }

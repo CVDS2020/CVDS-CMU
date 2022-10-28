@@ -10,183 +10,104 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(description = "国标设备/平台")
 public class Device {
 
-	/**
-	 * 设备国标编号
-	 */
+	@Schema(description = "ID")
+	private Long id;
+
 	@Schema(description = "设备国标编号")
 	private String deviceId;
 
-	/**
-	 * 设备名
-	 */
 	@Schema(description = "名称")
 	private String name;
-	
-	/**
-	 * 生产厂商
-	 */
+
 	@Schema(description = "生产厂商")
 	private String manufacturer;
-	
-	/**
-	 * 型号
-	 */
+
 	@Schema(description = "型号")
 	private String model;
-	
-	/**
-	 * 固件版本
-	 */
+
 	@Schema(description = "固件版本")
 	private String firmware;
 
-	/**
-	 * 传输协议
-	 * UDP/TCP
-	 */
 	@Schema(description = "传输协议（UDP/TCP）")
 	private String transport;
 
-	/**
-	 * 数据流传输模式
-	 * UDP:udp传输
-	 * TCP-ACTIVE：tcp主动模式
-	 * TCP-PASSIVE：tcp被动模式
-	 */
-	@Schema(description = "数据流传输模式")
+	@Schema(description = "数据流传输模式,  UDP:udp传输, TCP-ACTIVE:tcp主动模式, TCP-PASSIVE：tcp被动模式")
 	private String streamMode;
 
-	/**
-	 * wan地址_ip
-	 */
 	@Schema(description = "IP")
 	private String  ip;
 
-	/**
-	 * wan地址_port
-	 */
 	@Schema(description = "端口")
-	private int port;
+	private Integer port;
 
-	/**
-	 * wan地址
-	 */
 	@Schema(description = "wan地址")
 	private String  hostAddress;
 
 	@Schema(description = "子网掩码")
-	private Integer netmask;
+	private String netmask;
 
-	/**
-	 * 网关
-	 */
 	@Schema(description = "网关")
-	private Integer gateway;
-	
-	/**
-	 * 在线
-	 */
+	private String gateway;
+
 	@Schema(description = "是否在线，1为在线，0为离线")
-	private int online;
+	private Integer online;
 
-
-	/**
-	 * 注册时间
-	 */
 	@Schema(description = "注册时间")
 	private String registerTime;
 
-
-	/**
-	 * 心跳时间
-	 */
 	@Schema(description = "心跳时间")
 	private String keepaliveTime;
 
-	/**
-	 * 通道个数
-	 */
 	@Schema(description = "通道个数")
-	private int channelCount;
+	private Integer channelCount;
 
-	/**
-	 * 注册有效期
-	 */
 	@Schema(description = "注册有效期")
-	private int expires;
+	private Integer expires;
 
-	/**
-	 * 创建时间
-	 */
 	@Schema(description = "创建时间")
 	private String createTime;
 
-	/**
-	 * 更新时间
-	 */
 	@Schema(description = "更新时间")
 	private String updateTime;
 
-	/**
-	 * 设备使用的媒体id, 默认为null
-	 */
 	@Schema(description = "设备使用的媒体id, 默认为null")
 	private String mediaServerId;
 
-	/**
-	 * 字符集, 支持 UTF-8 与 GB2312
-	 */
 	@Schema(description = "符集, 支持 UTF-8 与 GB2312")
 	private String charset ;
 
-	/**
-	 * 目录订阅周期，0为不订阅
-	 */
 	@Schema(description = "目录订阅周期，0为不订阅")
-	private int subscribeCycleForCatalog;
+	private Integer subscribeCycleForCatalog;
 
-	/**
-	 * 移动设备位置订阅周期，0为不订阅
-	 */
 	@Schema(description = "移动设备位置订阅周期，0为不订阅")
-	private int subscribeCycleForMobilePosition;
+	private Integer subscribeCycleForMobilePosition;
 
-	/**
-	 * 移动设备位置信息上报时间间隔,单位:秒,默认值5
-	 */
 	@Schema(description = "移动设备位置信息上报时间间隔,单位:秒,默认值5")
-	private int mobilePositionSubmissionInterval = 5;
+	private Integer mobilePositionSubmissionInterval = 5;
 
-	/**
-	 * 报警订阅周期，0为不订阅
-	 */
 	@Schema(description = "报警心跳时间订阅周期，0为不订阅")
-	private int subscribeCycleForAlarm;
+	private Integer subscribeCycleForAlarm;
 
-	/**
-	 * 是否开启ssrc校验，默认关闭，开启可以防止串流
-	 */
 	@Schema(description = "是否开启ssrc校验，默认关闭，开启可以防止串流")
-	private boolean ssrcCheck = true;
+	private Boolean ssrcCheck = true;
 
-	/**
-	 * 地理坐标系， 目前支持 WGS84,GCJ02
-	 */
 	@Schema(description = "地理坐标系， 目前支持 WGS84,GCJ02")
 	private String geoCoordSys;
 
-	/**
-	 * 监视物ID
-	 */
 	@Schema(description = "监视物ID")
 	private Integer superviseTargetId;
 
-	/**
-	 * 树类型 国标规定了两种树的展现方式 行政区划：CivilCode 和业务分组:BusinessGroup
-	 */
+	@Schema(description = "监视物类型")
+	private Integer superviseTargetType;
+
 	@Schema(description = "树类型 国标规定了两种树的展现方式 行政区划：CivilCode 和业务分组:BusinessGroup")
 	private String treeType;
 
+	@Schema(description = "摄像机安装位置")
+	private String position;
+
+	@Schema(description = "摄像机所在车厢号")
+	private Integer carriageNo;
 
 	public String getDeviceId() {
 		return deviceId;
@@ -252,11 +173,11 @@ public class Device {
 		this.ip = ip;
 	}
 
-	public int getPort() {
+	public Integer getPort() {
 		return port;
 	}
 
-	public void setPort(int port) {
+	public void setPort(Integer port) {
 		this.port = port;
 	}
 
@@ -268,19 +189,19 @@ public class Device {
 		this.hostAddress = hostAddress;
 	}
 
-	public int getOnline() {
+	public Integer getOnline() {
 		return online;
 	}
 
-	public void setOnline(int online) {
+	public void setOnline(Integer online) {
 		this.online = online;
 	}
 
-	public int getChannelCount() {
+	public Integer getChannelCount() {
 		return channelCount;
 	}
 
-	public void setChannelCount(int channelCount) {
+	public void setChannelCount(Integer channelCount) {
 		this.channelCount = channelCount;
 	}
 
@@ -300,11 +221,11 @@ public class Device {
 		this.keepaliveTime = keepaliveTime;
 	}
 
-	public int getExpires() {
+	public Integer getExpires() {
 		return expires;
 	}
 
-	public void setExpires(int expires) {
+	public void setExpires(Integer expires) {
 		this.expires = expires;
 	}
 
@@ -340,43 +261,43 @@ public class Device {
 		this.charset = charset;
 	}
 
-	public int getSubscribeCycleForCatalog() {
+	public Integer getSubscribeCycleForCatalog() {
 		return subscribeCycleForCatalog;
 	}
 
-	public void setSubscribeCycleForCatalog(int subscribeCycleForCatalog) {
+	public void setSubscribeCycleForCatalog(Integer subscribeCycleForCatalog) {
 		this.subscribeCycleForCatalog = subscribeCycleForCatalog;
 	}
 
-	public int getSubscribeCycleForMobilePosition() {
+	public Integer getSubscribeCycleForMobilePosition() {
 		return subscribeCycleForMobilePosition;
 	}
 
-	public void setSubscribeCycleForMobilePosition(int subscribeCycleForMobilePosition) {
+	public void setSubscribeCycleForMobilePosition(Integer subscribeCycleForMobilePosition) {
 		this.subscribeCycleForMobilePosition = subscribeCycleForMobilePosition;
 	}
 
-	public int getMobilePositionSubmissionInterval() {
+	public Integer getMobilePositionSubmissionInterval() {
 		return mobilePositionSubmissionInterval;
 	}
 
-	public void setMobilePositionSubmissionInterval(int mobilePositionSubmissionInterval) {
+	public void setMobilePositionSubmissionInterval(Integer mobilePositionSubmissionInterval) {
 		this.mobilePositionSubmissionInterval = mobilePositionSubmissionInterval;
 	}
 
-	public int getSubscribeCycleForAlarm() {
+	public Integer getSubscribeCycleForAlarm() {
 		return subscribeCycleForAlarm;
 	}
 
-	public void setSubscribeCycleForAlarm(int subscribeCycleForAlarm) {
+	public void setSubscribeCycleForAlarm(Integer subscribeCycleForAlarm) {
 		this.subscribeCycleForAlarm = subscribeCycleForAlarm;
 	}
 
-	public boolean isSsrcCheck() {
+	public Boolean isSsrcCheck() {
 		return ssrcCheck;
 	}
 
-	public void setSsrcCheck(boolean ssrcCheck) {
+	public void setSsrcCheck(Boolean ssrcCheck) {
 		this.ssrcCheck = ssrcCheck;
 	}
 
@@ -396,27 +317,59 @@ public class Device {
 		this.treeType = treeType;
 	}
 
-	public Integer getNetmask() {
-		return netmask;
-	}
-
-	public void setNetmask(Integer netmask) {
-		this.netmask = netmask;
-	}
-
-	public Integer getGateway() {
-		return gateway;
-	}
-
-	public void setGateway(Integer gateway) {
-		this.gateway = gateway;
-	}
-
 	public Integer getSuperviseTargetId() {
 		return superviseTargetId;
 	}
 
 	public void setSuperviseTargetId(Integer superviseTargetId) {
 		this.superviseTargetId = superviseTargetId;
+	}
+
+	public String getNetmask() {
+		return netmask;
+	}
+
+	public void setNetmask(String netmask) {
+		this.netmask = netmask;
+	}
+
+	public String getGateway() {
+		return gateway;
+	}
+
+	public void setGateway(String gateway) {
+		this.gateway = gateway;
+	}
+
+	public String getPosition() {
+		return position;
+	}
+
+	public void setPosition(String position) {
+		this.position = position;
+	}
+
+	public Integer getCarriageNo() {
+		return carriageNo;
+	}
+
+	public void setCarriageNo(Integer carriageNo) {
+		this.carriageNo = carriageNo;
+	}
+
+	public Integer getSuperviseTargetType() {
+		return superviseTargetType;
+	}
+
+	public void setSuperviseTargetType(Integer superviseTargetType) {
+		this.superviseTargetType = superviseTargetType;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 }

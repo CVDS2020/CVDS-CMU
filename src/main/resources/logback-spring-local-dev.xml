@@ -94,22 +94,23 @@
 
 
 	<!-- 日志输出级别 -->
-	<root level="ERROR">
+	<root level="INFO">
 		<appender-ref ref="STDOUT" />
 	</root>
 
-	<logger name="wvp" level="error" additivity="true">
+	<logger name="wvp" level="debug" additivity="true">
 		<appender-ref ref="RollingFileError"/>
 		<appender-ref ref="RollingFile"/>
 	</logger>
 
-	<logger name="GB28181_SIP" level="error" additivity="true">
+	<logger name="GB28181_SIP" level="debug" additivity="true">
 		<appender-ref ref="RollingFileError"/>
 		<appender-ref ref="sipRollingFile"/>
 	</logger>
 
 	<!--记录druid-sql的记录-->
-	<logger name="com.css.cvds.cmu.storager.dao" level="error" additivity="true">
+	<logger name="com.css.cvds.cmu.storager.dao" level="info" additivity="true">
+		<!--AppenderRef ref="Console"/-->
 		<appender-ref ref="RollingFileError"/>
 		<appender-ref ref="druidSqlRollingFile"/>
 	</logger>

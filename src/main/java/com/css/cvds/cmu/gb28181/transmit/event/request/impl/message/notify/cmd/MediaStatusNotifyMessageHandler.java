@@ -74,14 +74,6 @@ public class MediaStatusNotifyMessageHandler extends SIPRequestProcessorParent i
         String NotifyType =getText(rootElement, "NotifyType");
         if ("121".equals(NotifyType)){
             logger.info("[录像流]推送完毕，收到关流通知");
-            // 查询是设备
-            StreamInfo streamInfo = redisCatchStorage.queryDownload(null, null, null, callIdHeader.getCallId());
-            if (streamInfo != null) {
-                // 设置进度100%
-                streamInfo.setProgress(1);
-                redisCatchStorage.startDownload(streamInfo, callIdHeader.getCallId());
-            }
-
             // 先从会话内查找
             SsrcTransaction ssrcTransaction = sessionManager.getSsrcTransaction(null, null, callIdHeader.getCallId(), null);
             // 兼容海康 媒体通知 消息from字段不是设备ID的问题

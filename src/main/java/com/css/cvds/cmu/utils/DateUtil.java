@@ -65,7 +65,17 @@ public class DateUtil {
      */
     public static String getNow() {
         LocalDateTime nowDateTime = LocalDateTime.now();
+
         return formatter.format(nowDateTime);
+    }
+
+    /**
+     * 获取当前时间
+     * @return
+     */
+    public static String getNowMinusHours(long hours) {
+        LocalDateTime dateTime = LocalDateTime.now().minusHours(24);
+        return formatter.format(dateTime);
     }
 
     /**

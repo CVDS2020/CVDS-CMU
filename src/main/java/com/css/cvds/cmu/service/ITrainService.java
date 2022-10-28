@@ -1,9 +1,6 @@
 package com.css.cvds.cmu.service;
 
-import com.css.cvds.cmu.storager.dao.dto.AccessLogDto;
-import com.css.cvds.cmu.storager.dao.dto.LogDto;
-import com.css.cvds.cmu.storager.dao.dto.TrainDto;
-import com.github.pagehelper.PageInfo;
+import com.css.cvds.cmu.gb28181.bean.Train;
 
 /**
  * 列车
@@ -12,15 +9,8 @@ public interface ITrainService {
 
     /**
      * 列车
-     * @param trainDto 列车
-     *
+     * @return  train 列车
      */
-    void update(TrainDto trainDto);
-
-    /**
-     * 列车
-     * @return  trainDto 列车
-     */
-    TrainDto get();
+    Train get();
 
 }

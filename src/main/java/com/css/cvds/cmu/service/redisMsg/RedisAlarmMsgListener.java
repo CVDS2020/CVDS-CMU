@@ -2,14 +2,9 @@ package com.css.cvds.cmu.service.redisMsg;
 
 import com.alibaba.fastjson.JSON;
 import com.css.cvds.cmu.gb28181.bean.AlarmChannelMessage;
-import com.css.cvds.cmu.gb28181.bean.Device;
-import com.css.cvds.cmu.gb28181.bean.DeviceAlarm;
-import com.css.cvds.cmu.gb28181.bean.ParentPlatform;
 import com.css.cvds.cmu.gb28181.transmit.cmd.ISIPCommander;
 import com.css.cvds.cmu.gb28181.transmit.cmd.ISIPCommanderForPlatform;
 import com.css.cvds.cmu.storager.IVideoManagerStorage;
-import com.css.cvds.cmu.utils.DateUtil;
-import com.css.cvds.cmu.gb28181.bean.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,13 +13,8 @@ import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ObjectUtils;
 
-import javax.sip.InvalidArgumentException;
-import javax.sip.SipException;
 import javax.validation.constraints.NotNull;
-import java.text.ParseException;
-import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 

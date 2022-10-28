@@ -1,5 +1,7 @@
 package com.css.cvds.cmu.web.gb28181.alarm;
 
+import com.css.cvds.cmu.conf.security.SecurityUtils;
+import com.css.cvds.cmu.conf.security.dto.LoginUser;
 import com.css.cvds.cmu.storager.dao.dto.Role;
 import com.css.cvds.cmu.utils.DateUtil;
 import com.css.cvds.cmu.conf.exception.ControllerException;
@@ -45,7 +47,7 @@ public class AlarmController {
     @Parameter(name = "deviceIds", description = "多个设备id,逗号分隔")
     @Parameter(name = "time", description = "结束时间")
     public WVPResult<List<Role>> delete(
-            @RequestParam(required = false) Integer id,
+            @RequestParam(required = false) Long id,
             @RequestParam(required = false) String deviceIds,
             @RequestParam(required = false) String time
     ) {
@@ -71,44 +73,30 @@ public class AlarmController {
         return WVPResult.success();
     }
 
-    /**
-     *  分页查询报警
-     *
-     * @param deviceId 设备id
-     * @param page 当前页
-     * @param count 每页查询数量
-     * @param alarmPriority  报警级别
-     * @param alarmMethod 报警方式
-     * @param alarmType  报警类型
-     * @param startTime  开始时间
-     * @param endTime 结束时间
-     * @return
-     */
     @Operation(summary = "分页查询报警")
     @Parameter(name = "page",description = "当前页",required = true)
     @Parameter(name = "count",description = "每页查询数量",required = true)
-    @Parameter(name = "deviceId",description = "设备id")
-    @Parameter(name = "alarmPriority",description = "查询内容")
-    @Parameter(name = "alarmMethod",description = "查询内容")
-    @Parameter(name = "alarmType",description = "每页查询数量")
     @Parameter(name = "startTime",description = "开始时间")
     @Parameter(name = "endTime",description = "结束时间")
+    @Parameter(name = "deviceId",description = "设备id")
+    @Parameter(name = "alarmPriority",description = "告警级别")
+    @Parameter(name = "alarmType",description = "告警类型")
+    @Parameter(name = "already",description = "是否已处理，空/或者不填表示忽略")
+    @Parameter(name = "sortField",description = "排序字段：time/priority/already")
+    @Parameter(name = "sort",description = "排序方式：0 降序，1 升序")
     @GetMapping("/all")
     public WVPResult<PageInfo<DeviceAlarm>> getAll(
             @RequestParam int page,
             @RequestParam int count,
-            @RequestParam(required = false)  String deviceId,
+            @RequestParam(required = false) String deviceId,
             @RequestParam(required = false) String alarmPriority,
-            @RequestParam(required = false) String alarmMethod,
             @RequestParam(required = false) String alarmType,
             @RequestParam(required = false) String startTime,
-            @RequestParam(required = false) String endTime
+            @RequestParam(required = false) String endTime,
+            @RequestParam(required = false) Boolean already
     ) {
         if (ObjectUtils.isEmpty(alarmPriority)) {
             alarmPriority = null;
-        }
-        if (ObjectUtils.isEmpty(alarmMethod)) {
-            alarmMethod = null;
         }
         if (ObjectUtils.isEmpty(alarmType)) {
             alarmType = null;
@@ -124,7 +112,49 @@ public class AlarmController {
             throw new ControllerException(ErrorCode.ERROR100.getCode(), "开始时间或结束时间格式有误");
         }
 
-        return WVPResult.success(deviceAlarmService.getAllAlarm(page, count, deviceId, alarmPriority, alarmMethod,
-                alarmType, startTime, endTime));
+        return WVPResult.success(deviceAlarmService.getAllAlarm(page, count, deviceId, alarmPriority, null,
+                alarmType, startTime, endTime, already));
+    }
+
+    /**
+     *  查询告警类型
+     *
+     * @return
+     */
+    @Operation(summary = "查询告警类型")
+    @GetMapping("/getAlarmType")
+    public WVPResult<List<String>> getAlarmType() {
+        return WVPResult.success(deviceAlarmService.getAlarmTypeList());
+    }
+
+    /**
+     *  查询最近24小时报警
+     *
+     * @return
+     */
+    @Operation(summary = "查询最近24小时报警")
+    @GetMapping("/getLast")
+    public WVPResult<List<DeviceAlarm>> getLast() {
+        String startTime = DateUtil.getNowMinusHours(24);
+        String endTime = DateUtil.getNow();
+        return WVPResult.success(deviceAlarmService.getAlarm(startTime, endTime, false));
+    }
+
+    /**
+     *  设置告警状态
+     *
+     * @return
+     */
+    @Operation(summary = "设置告警状态")
+    @PutMapping("/{id}/setAlready")
+    @Parameter(name = "already",description = "false 未处理，true 已处理")
+    public WVPResult<?> setAlready(@PathVariable Long id, @RequestParam Boolean already) {
+        if (already == null || !already) {
+            deviceAlarmService.updateAlready(id, null, null);
+        } else {
+            LoginUser userInfo = SecurityUtils.getUserInfo();
+            deviceAlarmService.updateAlready(id, userInfo != null ? userInfo.getId() : 0, DateUtil.getNow());
+        }
+        return WVPResult.success();
     }
 }

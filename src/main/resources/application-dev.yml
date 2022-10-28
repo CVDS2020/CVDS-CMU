@@ -74,9 +74,9 @@ media:
 user-settings:
     # 接口鉴权例外的接口, 即不进行接口鉴权的接口,尽量详细书写，尽量不用/**，至少两级目录
     interface-authentication-excludes:
-        - /api/v1/stream/**
+        - /api/stream/**
         - /doc.html/**
 
 # [可选] 日志配置, 一般不需要改
 logging:
-    config: classpath:logback-spring-local.xml
+    config: classpath:logback-spring-local-dev.xml

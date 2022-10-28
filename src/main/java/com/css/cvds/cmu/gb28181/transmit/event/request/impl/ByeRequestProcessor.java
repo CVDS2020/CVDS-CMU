@@ -83,48 +83,36 @@ public class ByeRequestProcessor extends SIPRequestProcessorParent implements In
 			logger.error("[回复BYE信息失败]，{}", e.getMessage());
 		}
 		CallIdHeader callIdHeader = (CallIdHeader)evt.getRequest().getHeader(CallIdHeader.NAME);
-			String platformGbId = ((SipURI) ((HeaderAddress) evt.getRequest().getHeader(FromHeader.NAME)).getAddress().getURI()).getUser();
-			String channelId = ((SipURI) ((HeaderAddress) evt.getRequest().getHeader(ToHeader.NAME)).getAddress().getURI()).getUser();
-			SendRtpItem sendRtpItem =  redisCatchStorage.querySendRTPServer(platformGbId, channelId, null, callIdHeader.getCallId());
-			logger.info("[收到bye] {}/{}", platformGbId, channelId);
-			if (sendRtpItem != null){
-				String streamId = sendRtpItem.getStreamId();
-				Map<String, Object> param = new HashMap<>();
-				param.put("vhost","__defaultVhost__");
-				param.put("app",sendRtpItem.getApp());
-				param.put("stream",streamId);
-				param.put("ssrc",sendRtpItem.getSsrc());
-				logger.info("[收到bye] 停止向上级推流：{}", streamId);
-				redisCatchStorage.deleteSendRTPServer(platformGbId, channelId, callIdHeader.getCallId(), null);
+		String platformGbId = ((SipURI) ((HeaderAddress) evt.getRequest().getHeader(FromHeader.NAME)).getAddress().getURI()).getUser();
+		String channelId = ((SipURI) ((HeaderAddress) evt.getRequest().getHeader(ToHeader.NAME)).getAddress().getURI()).getUser();
+		// 可能是设备主动停止
+		Device device = storager.queryVideoDeviceByChannelId(platformGbId);
+		if (device != null) {
+			storager.stopPlay(device.getDeviceId(), channelId);
+			StreamInfo streamInfo = redisCatchStorage.queryPlayByDevice(device.getDeviceId(), channelId);
+			if (streamInfo != null) {
+				redisCatchStorage.stopPlay(streamInfo);
 			}
-			// 可能是设备主动停止
-			Device device = storager.queryVideoDeviceByChannelId(platformGbId);
-			if (device != null) {
-				storager.stopPlay(device.getDeviceId(), channelId);
-				StreamInfo streamInfo = redisCatchStorage.queryPlayByDevice(device.getDeviceId(), channelId);
-				if (streamInfo != null) {
-					redisCatchStorage.stopPlay(streamInfo);
-				}
-				SsrcTransaction ssrcTransactionForPlay = streamSession.getSsrcTransaction(device.getDeviceId(), channelId, "play", null);
-				if (ssrcTransactionForPlay != null){
-					if (ssrcTransactionForPlay.getCallId().equals(callIdHeader.getCallId())){
-						// 释放ssrc
-						MediaServerItem mediaServerItem = mediaServerService.getOne(ssrcTransactionForPlay.getMediaServerId());
-						if (mediaServerItem != null) {
-							mediaServerService.releaseSsrc(mediaServerItem.getId(), ssrcTransactionForPlay.getSsrc());
-						}
-						streamSession.remove(device.getDeviceId(), channelId, ssrcTransactionForPlay.getStream());
-					}
-				}
-				SsrcTransaction ssrcTransactionForPlayBack = streamSession.getSsrcTransaction(device.getDeviceId(), channelId, callIdHeader.getCallId(), null);
-				if (ssrcTransactionForPlayBack != null) {
+			SsrcTransaction ssrcTransactionForPlay = streamSession.getSsrcTransaction(device.getDeviceId(), channelId, "play", null);
+			if (ssrcTransactionForPlay != null){
+				if (ssrcTransactionForPlay.getCallId().equals(callIdHeader.getCallId())){
 					// 释放ssrc
-					MediaServerItem mediaServerItem = mediaServerService.getOne(ssrcTransactionForPlayBack.getMediaServerId());
+					MediaServerItem mediaServerItem = mediaServerService.getOne(ssrcTransactionForPlay.getMediaServerId());
 					if (mediaServerItem != null) {
-						mediaServerService.releaseSsrc(mediaServerItem.getId(), ssrcTransactionForPlayBack.getSsrc());
+						mediaServerService.releaseSsrc(mediaServerItem.getId(), ssrcTransactionForPlay.getSsrc());
 					}
-					streamSession.remove(device.getDeviceId(), channelId, ssrcTransactionForPlayBack.getStream());
+					streamSession.remove(device.getDeviceId(), channelId, ssrcTransactionForPlay.getStream());
 				}
 			}
+			SsrcTransaction ssrcTransactionForPlayBack = streamSession.getSsrcTransaction(device.getDeviceId(), channelId, callIdHeader.getCallId(), null);
+			if (ssrcTransactionForPlayBack != null) {
+				// 释放ssrc
+				MediaServerItem mediaServerItem = mediaServerService.getOne(ssrcTransactionForPlayBack.getMediaServerId());
+				if (mediaServerItem != null) {
+					mediaServerService.releaseSsrc(mediaServerItem.getId(), ssrcTransactionForPlayBack.getSsrc());
+				}
+				streamSession.remove(device.getDeviceId(), channelId, ssrcTransactionForPlayBack.getStream());
+			}
+		}
 	}
 }

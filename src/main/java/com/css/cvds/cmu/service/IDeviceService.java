@@ -20,6 +20,13 @@ public interface IDeviceService {
     void add(Device device);
 
     /**
+     * 根据id更新数据库
+     *
+     * @param device 设备信息
+     */
+    void updateDeviceById(Device device);
+
+    /**
      * 设备上线
      * @param device 设备信息
      */
@@ -87,10 +94,37 @@ public interface IDeviceService {
     Device queryDevice(String deviceId);
 
     /**
+     * 查询设备信息
+     * @param ip 编号ip
+     * @return 设备信息
+     */
+    Device queryDeviceByIp(String ip);
+
+    /**
      * 获取所有在线设备
      * @return 设备列表
      */
     List<Device> getAllOnlineDevice();
+
+
+    /**
+     * 查询设备信息
+     * @param id 数据库id
+     * @return 设备信息
+     */
+    Device queryDeviceById(Long id);
+
+    /**
+     * 获取在线设备数
+     * @return 数量
+     */
+    Integer getOnlineDeviceCount();
+
+    /**
+     * 获取设备数
+     * @return 数量
+     */
+    Integer getDeviceCount();
 
     /**
      * 判断是否注册已经失效

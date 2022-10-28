@@ -80,11 +80,34 @@ public class RegisterRequestProcessor extends SIPRequestProcessorParent implemen
             SipUri uri = (SipUri) address.getURI();
             String deviceId = uri.getUser();
 
+            // 获取到通信地址等信息
+            ViaHeader viaHeader = (ViaHeader) request.getHeader(ViaHeader.NAME);
+            String received = viaHeader.getReceived();
+            int rPort = viaHeader.getRPort();
+            // 解析本地地址替代
+            if (ObjectUtils.isEmpty(received) || rPort == -1) {
+                received = viaHeader.getHost();
+                rPort = viaHeader.getPort();
+            }
+
             AuthorizationHeader authHead = (AuthorizationHeader) request.getHeader(AuthorizationHeader.NAME);
             if (authHead == null && !ObjectUtils.isEmpty(sipConfig.getPassword())) {
                 logger.info("[注册请求] 未携带授权头 回复401: {}", requestAddress);
                 response = getMessageFactory().createResponse(Response.UNAUTHORIZED, request);
                 new DigestServerAuthenticationHelper().generateChallenge(getHeaderFactory(), response, sipConfig.getDomain());
+                sendResponse(evt, response);
+                return;
+            }
+
+            Device device = deviceService.queryDevice(deviceId);
+            if (device == null) {
+                device = deviceService.queryDeviceByIp(received);
+            }
+            if (device == null) {
+                // 没有添加到系统里的设备，返回错误
+                response = getMessageFactory().createResponse(Response.NOT_ACCEPTABLE, request);
+                response.setReasonPhrase("non system inside device");
+                logger.info("[注册请求] 摄像机未添加, 回复406（non system inside device）: {}", requestAddress);
                 sendResponse(evt, response);
                 return;
             }
@@ -101,8 +124,6 @@ public class RegisterRequestProcessor extends SIPRequestProcessorParent implemen
                 sendResponse(evt, response);
                 return;
             }
-
-            Device device = deviceService.queryDevice(deviceId);
 
             // 携带授权头并且密码正确
             response = getMessageFactory().createResponse(Response.OK, request);
@@ -127,24 +148,15 @@ public class RegisterRequestProcessor extends SIPRequestProcessorParent implemen
             // 添加Expires头
             response.addHeader(request.getExpires());
 
-            // 获取到通信地址等信息
-            ViaHeader viaHeader = (ViaHeader) request.getHeader(ViaHeader.NAME);
-            String received = viaHeader.getReceived();
-            int rPort = viaHeader.getRPort();
-            // 解析本地地址替代
-            if (ObjectUtils.isEmpty(received) || rPort == -1) {
-                received = viaHeader.getHost();
-                rPort = viaHeader.getPort();
-            }
             if (device == null) {
                 device = new Device();
                 device.setStreamMode("TCP-PASSIVE");
                 device.setCharset("GB2312");
                 device.setGeoCoordSys("WGS84");
                 device.setTreeType("CivilCode");
-                device.setDeviceId(deviceId);
                 device.setOnline(0);
             }
+            device.setDeviceId(deviceId);
             device.setIp(received);
             device.setPort(rPort);
             device.setHostAddress(received.concat(":").concat(String.valueOf(rPort)));

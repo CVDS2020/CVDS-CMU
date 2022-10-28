@@ -77,24 +77,36 @@ public class DeviceServiceImpl implements IDeviceService {
     }
 
     @Override
+    public void updateDeviceById(Device device) {
+        deviceMapper.updateById(device);
+    }
+
+    @Override
     public void online(Device device) {
         logger.info("[设备上线] deviceId：{}->{}:{}", device.getDeviceId(), device.getIp(), device.getPort());
         Device deviceInRedis = redisCatchStorage.getDevice(device.getDeviceId());
-        Device deviceInDb = deviceMapper.getDeviceByDeviceId(device.getDeviceId());
-
+        Device deviceById = deviceMapper.getDeviceByDeviceId(device.getDeviceId());
+        Device deviceByIp = null;
+        if (deviceById == null) {
+            deviceByIp = deviceMapper.getDeviceByDeviceIp(device.getIp());
+        }
         String now = DateUtil.getNow();
-        if (deviceInRedis != null && deviceInDb == null) {
+        if (deviceInRedis != null && deviceById == null) {
             // redis 存在脏数据
             redisCatchStorage.clearCatchByDeviceId(device.getDeviceId());
         }
         device.setUpdateTime(now);
 
         // 第一次上线 或则设备之前是离线状态--进行通道同步和设备信息查询
-        if (device.getCreateTime() == null) {
+        if (deviceById == null) {
             device.setOnline(1);
-            device.setCreateTime(now);
             logger.info("[设备上线,首次注册]: {}，查询设备信息以及通道信息", device.getDeviceId());
-            deviceMapper.add(device);
+            if (deviceByIp != null) {
+                deviceMapper.updateByIp(device);
+            } else {
+                device.setCreateTime(now);
+                deviceMapper.add(device);
+            }
             redisCatchStorage.updateDevice(device);
             try {
                 commander.deviceInfoQuery(device);
@@ -271,8 +283,34 @@ public class DeviceServiceImpl implements IDeviceService {
     }
 
     @Override
+    public Device queryDeviceByIp(String ip) {
+
+        Device device = deviceMapper.getDeviceByDeviceIp(ip);
+        if (device != null) {
+            redisCatchStorage.updateDevice(device);
+        }
+
+        return device;
+    }
+
+    @Override
     public List<Device> getAllOnlineDevice() {
         return deviceMapper.getOnlineDevices();
+    }
+
+    @Override
+    public Device queryDeviceById(Long id) {
+        return deviceMapper.getDeviceById(id);
+    }
+
+    @Override
+    public Integer getOnlineDeviceCount() {
+        return deviceMapper.getOnlineDeviceCount();
+    }
+
+    @Override
+    public Integer getDeviceCount() {
+        return deviceMapper.getDeviceCount();
     }
 
     @Override

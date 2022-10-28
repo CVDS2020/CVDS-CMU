@@ -32,9 +32,6 @@ public class RedisGpsMsgListener implements MessageListener {
     @Autowired
     private IRedisCatchStorage redisCatchStorage;
 
-    @Autowired
-    private IVideoManagerStorage storager;
-
     private ConcurrentLinkedQueue<Message> taskQueue = new ConcurrentLinkedQueue<>();
 
     @Qualifier("taskExecutor")

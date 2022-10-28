@@ -1,5 +1,6 @@
-package com.css.cvds.cmu.web.gb28181.platform.bean;
+package com.css.cvds.cmu.web.bean;
 
+import com.css.cvds.cmu.web.bean.ChannelReduce;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;

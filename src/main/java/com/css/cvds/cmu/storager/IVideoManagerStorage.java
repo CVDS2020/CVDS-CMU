@@ -1,6 +1,7 @@
 package com.css.cvds.cmu.storager;
 
 import com.css.cvds.cmu.gb28181.bean.*;
+import com.css.cvds.cmu.web.bean.DeviceVO;
 import com.github.pagehelper.PageInfo;
 
 import java.util.List;
@@ -48,18 +49,6 @@ public interface IVideoManagerStorage {
 	 * 获取某个设备的通道列表
 	 *
 	 * @param deviceId 设备ID
-	 * @param page 分页 当前页
-	 * @param count 每页数量
-	 * @return
-	 */
-	PageInfo<DeviceChannel> queryChannelsByDeviceId(String deviceId, String query, Boolean hasSubChannel, Boolean online, Boolean catalogUnderDevice, int page, int count);
-	
-	List<DeviceChannel> queryChannelsByDeviceIdWithStartAndLimit(String deviceId, String query, Boolean hasSubChannel, Boolean online, int start, int limit);
-
-	/**
-	 * 获取某个设备的通道列表
-	 *
-	 * @param deviceId 设备ID
 	 * @return
 	 */
 	List<DeviceChannel> queryChannelsByDeviceId(String deviceId);
@@ -82,20 +71,25 @@ public interface IVideoManagerStorage {
 	 * 获取多个设备
 	 * @param page 当前页数
 	 * @param count 每页数量
-	 * @param keyword 关键字（名称，设备id，设备ip）过滤
+	 * @param keyword 关键字（名称，设备ip）过滤
 	 * @param online 是否在线
-	 * @param superviseTargetId 监控物
+	 * @param superviseTargetType 监控物
 	 * @return List<Device> 设备对象数组
 	 */
 	PageInfo<Device> queryVideoDeviceList(int page, int count,
-												 String keyword, Boolean online, Integer superviseTargetId);
+										  String keyword, Boolean online, Integer carriageNo, Integer superviseTargetType);
 
 	/**
 	 * 获取多个设备
-	 *
+	 * @param page 当前页数
+	 * @param count 每页数量
+	 * @param keyword 关键字（名称，设备ip）过滤
+	 * @param online 是否在线
+	 * @param superviseTargetType 监控物
 	 * @return List<Device> 设备对象数组
 	 */
-	List<Device> queryVideoDeviceList();
+	PageInfo<DeviceVO> queryDeviceList(int page, int count,
+											String keyword, Boolean online, Integer carriageNo, Integer superviseTargetType);
 
 	/**   
 	 * 删除设备
@@ -120,17 +114,6 @@ public interface IVideoManagerStorage {
 	 * @return true：更新成功  false：更新失败
 	 */
 	boolean outline(String deviceId);
-
-	/**
-	 * 查询子设备
-	 *
-	 * @param deviceId
-	 * @param channelId
-	 * @param page
-	 * @param count
-	 * @return
-	 */
-	PageInfo querySubChannels(String deviceId, String channelId, String query, Boolean hasSubChannel, Boolean online, int page, int count);
 
 	/**
 	 * 清空通道

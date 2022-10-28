@@ -21,10 +21,26 @@ public interface IDeviceAlarmService {
      * @param alarmType 报警类型
      * @param startTime 开始时间
      * @param endTime 结束时间
+     * @param already 是否已处理
      * @return 报警列表
      */
     PageInfo<DeviceAlarm> getAllAlarm(int page, int count, String deviceId, String alarmPriority, String alarmMethod,
-                                      String alarmType, String startTime, String endTime);
+                                      String alarmType, String startTime, String endTime, Boolean already);
+
+    /**
+     * 根据时间获取报警列表
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @param already 是否已处理
+     * @return 报警列表
+     */
+    List<DeviceAlarm> getAlarm(String startTime, String endTime, Boolean already);
+
+    /**
+     * 根据获取报警类型列表
+     * @return 报警列表
+     */
+    List<String> getAlarmTypeList();
 
     /**
      * 添加一个报警
@@ -38,6 +54,14 @@ public interface IDeviceAlarmService {
      * @param deviceIdList 制定需要清理的设备id
      * @param time 不写时间则清空所有时间的
      */
-    int clearAlarmBeforeTime(Integer id, List<String> deviceIdList, String time);
+    int clearAlarmBeforeTime(Long id, List<String> deviceIdList, String time);
+
+    /**
+     * 更新告警处理信息
+     * @param id 数据库id
+     * @param alreadyUser 处理userId
+     * @param alreadyTime 处理时间
+     */
+    int updateAlready(Long id, Integer alreadyUser, String alreadyTime);
 
 }

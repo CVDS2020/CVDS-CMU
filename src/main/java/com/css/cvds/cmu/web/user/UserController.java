@@ -1,6 +1,7 @@
 package com.css.cvds.cmu.web.user;
 
 import com.css.cvds.cmu.conf.exception.ControllerException;
+import com.css.cvds.cmu.storager.dao.dto.LogDto;
 import com.css.cvds.cmu.utils.DateUtil;
 import com.css.cvds.cmu.conf.security.SecurityUtils;
 import com.css.cvds.cmu.conf.security.dto.LoginUser;
@@ -21,6 +22,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.security.sasl.AuthenticationException;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -54,6 +56,10 @@ public class UserController {
         if (user == null) {
             throw new ControllerException(ErrorCode.ERROR100.getCode(), "用户名或密码错误");
         }
+        LogDto logDto = new LogDto();
+        logDto.setUserId(user.getId());
+        logDto.setCreateTime(new Date());
+
         return user;
     }
 

@@ -23,9 +23,9 @@ public interface SuperviseTargetMapper {
             "from " +
             "supervise_target s " +
             "WHERE " +
-            " <if test='type != null'> AND d.type=#{type} </if> " +
+            " <if test='type != null'> AND s.type=#{type} </if> " +
             "1=1 " +
-            "ORDER BY d.type " +
+            "ORDER BY s.type " +
             " </script>"})
     List<SuperviseTarget> getList(Integer type);
 

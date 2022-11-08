@@ -22,22 +22,22 @@ public class DeviceVO {
     private Integer superviseTargetType;
 
     @Schema(description = "监视物类型名称")
-    private Integer superviseTargetTypeName;
+    private String superviseTargetTypeName;
 
     @Schema(description = "监视物ID")
     private Integer superviseTargetId;
 
     @Schema(description = "监视物名称")
-    private Integer superviseTargetName;
+    private String superviseTargetName;
 
     @Schema(description = "车厢号")
     private Integer carriageNo;
 
     @Schema(description = "摄像机位置")
-    private Integer position;
+    private String position;
 
     @Schema(description = "摄像机IP")
-    private Integer ip;
+    private String ip;
 
     @Schema(description = "摄像机在线状态, 0 离线, 1 在线")
     private String online;
@@ -83,11 +83,11 @@ public class DeviceVO {
         this.superviseTargetType = superviseTargetType;
     }
 
-    public Integer getSuperviseTargetTypeName() {
+    public String getSuperviseTargetTypeName() {
         return superviseTargetTypeName;
     }
 
-    public void setSuperviseTargetTypeName(Integer superviseTargetTypeName) {
+    public void setSuperviseTargetTypeName(String superviseTargetTypeName) {
         this.superviseTargetTypeName = superviseTargetTypeName;
     }
 
@@ -99,11 +99,11 @@ public class DeviceVO {
         this.superviseTargetId = superviseTargetId;
     }
 
-    public Integer getSuperviseTargetName() {
+    public String getSuperviseTargetName() {
         return superviseTargetName;
     }
 
-    public void setSuperviseTargetName(Integer superviseTargetName) {
+    public void setSuperviseTargetName(String superviseTargetName) {
         this.superviseTargetName = superviseTargetName;
     }
 
@@ -115,19 +115,19 @@ public class DeviceVO {
         this.carriageNo = carriageNo;
     }
 
-    public Integer getPosition() {
+    public String getPosition() {
         return position;
     }
 
-    public void setPosition(Integer position) {
+    public void setPosition(String position) {
         this.position = position;
     }
 
-    public Integer getIp() {
+    public String getIp() {
         return ip;
     }
 
-    public void setIp(Integer ip) {
+    public void setIp(String ip) {
         this.ip = ip;
     }
 

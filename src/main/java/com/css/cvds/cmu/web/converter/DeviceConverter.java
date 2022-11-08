@@ -39,4 +39,12 @@ public interface DeviceConverter {
      * @return DeviceDetailsVO
      */
     DeviceDetailsVO toDetailsVo(Device entity);
+
+    /**
+     * to VO
+     *
+     * @param entity Device
+     * @return DeviceDetailsVO
+     */
+    DeviceDetailsVO toDetailsVo(DeviceVO entity);
 }

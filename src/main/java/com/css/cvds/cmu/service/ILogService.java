@@ -2,6 +2,8 @@ package com.css.cvds.cmu.service;
 
 import com.css.cvds.cmu.storager.dao.dto.AccessLogDto;
 import com.css.cvds.cmu.storager.dao.dto.LogDto;
+import com.css.cvds.cmu.utils.SysLogEnum;
+import com.css.cvds.cmu.utils.UserLogEnum;
 import com.github.pagehelper.PageInfo;
 
 /**
@@ -19,13 +21,21 @@ public interface ILogService {
      * @param endTime 结束时间
      * @return 日志列表
      */
-    PageInfo<LogDto> getList(int page, int count, String query, int type, String startTime, String endTime);
+    PageInfo<LogDto> getList(int page, int count, String query, Integer type, String startTime, String endTime);
 
     /**
      * 添加访问日志
-     * @param logDto 日志
+     * @param type 日志类型
+     * @param content 日志内容
      */
-    void addLog(LogDto logDto);
+    void addUserLog(UserLogEnum type, String content);
+
+    /**
+     * 添加访问日志
+     * @param type 日志类型
+     * @param content 日志内容
+     */
+    void addSysLog(SysLogEnum type, String content);
 
     /**
      * 查询访问日志

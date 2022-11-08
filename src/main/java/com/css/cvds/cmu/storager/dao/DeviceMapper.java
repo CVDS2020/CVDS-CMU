@@ -196,12 +196,12 @@ public interface DeviceMapper {
             "from " +
             "device d " +
             "WHERE " +
+            "1=1 " +
             " <if test='keyword != null'> AND (d.name LIKE '%${keyword}%' OR d.ip LIKE '%${keyword}%')</if> " +
             " <if test='superviseTargetType != null'> AND d.superviseTargetType=#{superviseTargetType} </if> " +
             " <if test='carriageNo != null'> AND d.carriageNo=#{carriageNo} </if> " +
-            " <if test='online == true' > AND d.status=1</if>" +
-            " <if test='online == false' > AND d.status=0</if>" +
-            "1=1 " +
+            " <if test='online == true' > AND d.online=1</if>" +
+            " <if test='online == false' > AND d.online=0</if>" +
             "ORDER BY d.deviceId " +
             " </script>"})
     List<Device> getDevices(String keyword, Boolean online, Integer carriageNo, Integer superviseTargetType);

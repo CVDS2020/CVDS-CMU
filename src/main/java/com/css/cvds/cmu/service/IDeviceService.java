@@ -4,6 +4,8 @@ import com.css.cvds.cmu.gb28181.bean.Device;
 import com.css.cvds.cmu.gb28181.bean.DeviceChannel;
 import com.css.cvds.cmu.gb28181.bean.SyncStatus;
 import com.css.cvds.cmu.web.bean.BaseTree;
+import com.css.cvds.cmu.web.bean.DeviceDetailsVO;
+import com.css.cvds.cmu.web.bean.VideoConfig;
 
 import java.util.List;
 
@@ -92,6 +94,8 @@ public interface IDeviceService {
      * @return 设备信息
      */
     Device queryDevice(String deviceId);
+
+    void updateConfig(VideoConfig config);
 
     /**
      * 查询设备信息

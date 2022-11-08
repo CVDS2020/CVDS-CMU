@@ -27,12 +27,12 @@ public interface DeviceAlarmMapper {
             " <if test=\"alarmType != null\" >  AND alarmType = '${alarmType}' </if>" +
             " <if test=\"startTime != null\" >  AND alarmTime &gt;= '${startTime}' </if>" +
             " <if test=\"endTime != null\" >  AND alarmTime &lt;= '${endTime}' </if>" +
-            " <if test=\"already != null and already\" >  AND (alreadyTime != null AND alreadyTime != '') </if>" +
-            " <if test=\"already != null and !already\" >  AND (alreadyTime == null OR alreadyTime == '') </if>" +
-            " ORDER BY alarmTime ASC " +
+            " <if test=\"already != null and already == true\" >  AND (alreadyTime != null AND alreadyTime != '') </if>" +
+            " <if test=\"already != null and already == false\" >  AND (alreadyTime = null OR alreadyTime = '') </if>" +
+            " ORDER BY ${sortField} ${sortMethod} " +
             " </script>"})
     List<DeviceAlarm> query(String deviceId, String alarmPriority, String alarmMethod,
-                            String alarmType, String startTime, String endTime, Boolean already);
+                            String alarmType, String startTime, String endTime, Boolean already, String sortField, String sortMethod);
 
 
     @Delete(" <script>" +
@@ -48,4 +48,7 @@ public interface DeviceAlarmMapper {
 
     @Update(value = {"UPDATE device_alarm SET alreadyUser=#{alreadyUser}, alreadyTime=#{alreadyTime} WHERE id=#{id}"})
     int updateAlready(Long id, Integer alreadyUser, String alreadyTime);
+
+    @Select(value = {"SELECT alarmType FROM `device_alarm` GROUP BY alarmType"})
+    List<String> queryAlarmType();
 }

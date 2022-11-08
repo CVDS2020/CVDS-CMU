@@ -2,6 +2,8 @@ package com.css.cvds.cmu.web.gb28181.ptz;
 
  
 import com.css.cvds.cmu.conf.exception.ControllerException;
+import com.css.cvds.cmu.service.ILogService;
+import com.css.cvds.cmu.utils.UserLogEnum;
 import com.css.cvds.cmu.web.bean.ErrorCode;
 import com.css.cvds.cmu.web.bean.WVPResult;
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,6 +43,9 @@ public class PtzController {
 
 	@Autowired
 	private DeferredResultHolder resultHolder;
+
+	@Autowired
+	private ILogService logService;
 
 	/***
 	 * 云台控制
@@ -105,12 +110,12 @@ public class PtzController {
 		}
 		try {
 			cmder.frontEndCmd(device, channelId, cmdCode, horizonSpeed, verticalSpeed, zoomSpeed);
+			logService.addUserLog(UserLogEnum.HARDWARE_CTRL, "设备云台控制：" + deviceId + ", 命令:" + command);
 		} catch (SipException | InvalidArgumentException | ParseException e) {
 			logger.error("[命令发送失败] 云台控制: {}", e.getMessage());
 			throw new ControllerException(ErrorCode.ERROR100.getCode(), "命令发送失败: " + e.getMessage());
 		}
 	}
-
 
 	@Operation(summary = "通用前端控制命令")
 	@Parameter(name = "deviceId", description = "设备国标编号", required = true)
@@ -129,6 +134,7 @@ public class PtzController {
 
 		try {
 			cmder.frontEndCmd(device, channelId, cmdCode, parameter1, parameter2, combindCode2);
+			logService.addUserLog(UserLogEnum.HARDWARE_CTRL, "设备控制命令：" + deviceId + ", 命令:" + cmdCode);
 		} catch (SipException | InvalidArgumentException | ParseException e) {
 			logger.error("[命令发送失败] 前端控制: {}", e.getMessage());
 			throw new ControllerException(ErrorCode.ERROR100.getCode(), "命令发送失败: " + e.getMessage());

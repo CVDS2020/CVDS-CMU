@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 /**
  * @author chend
  */
+@Schema(description = "车辆信息")
 public class TrainDto {
 
     @Schema(description = "车次")

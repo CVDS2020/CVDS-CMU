@@ -1,6 +1,12 @@
 package com.css.cvds.cmu.web.storage;
 
+import com.css.cvds.cmu.conf.exception.ControllerException;
+import com.css.cvds.cmu.conf.security.SecurityUtils;
+import com.css.cvds.cmu.service.ILogService;
+import com.css.cvds.cmu.utils.SysLogEnum;
+import com.css.cvds.cmu.utils.UserLogEnum;
 import com.css.cvds.cmu.web.bean.Disk;
+import com.css.cvds.cmu.web.bean.ErrorCode;
 import com.css.cvds.cmu.web.bean.StorageConfig;
 import com.css.cvds.cmu.web.bean.WVPResult;
 import io.swagger.v3.oas.annotations.Operation;
@@ -8,6 +14,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
@@ -18,6 +25,9 @@ import org.springframework.web.context.request.async.DeferredResult;
 public class StorageController {
 
     private final static Logger logger = LoggerFactory.getLogger(StorageController.class);
+
+    @Autowired
+    private ILogService logService;
 
     @GetMapping("/disk/list")
     @Operation(summary = "获取磁盘列表")
@@ -55,6 +65,10 @@ public class StorageController {
     @PutMapping("/config")
     @Operation(summary = "更新存储配置")
     public WVPResult<?> saveStorageConfig(@RequestBody StorageConfig config) {
+        if (!SecurityUtils.isAdmin()) {
+            throw new ControllerException(ErrorCode.ERROR400.getCode(), "没有权限进行此项操作");
+        }
+        logService.addUserLog(UserLogEnum.DATA_CONFIG, "更新存储撇账号");
         return WVPResult.success(null);
     }
 }

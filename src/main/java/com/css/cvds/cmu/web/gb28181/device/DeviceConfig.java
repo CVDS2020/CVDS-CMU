@@ -8,12 +8,15 @@
 package com.css.cvds.cmu.web.gb28181.device;
 
 import com.css.cvds.cmu.conf.exception.ControllerException;
+import com.css.cvds.cmu.conf.security.SecurityUtils;
 import com.css.cvds.cmu.gb28181.bean.Device;
 import com.css.cvds.cmu.gb28181.transmit.callback.DeferredResultHolder;
 import com.css.cvds.cmu.gb28181.transmit.callback.RequestMessage;
 import com.css.cvds.cmu.gb28181.transmit.cmd.impl.SIPCommander;
+import com.css.cvds.cmu.service.ILogService;
 import com.css.cvds.cmu.storager.IVideoManagerStorage;
 
+import com.css.cvds.cmu.utils.UserLogEnum;
 import com.css.cvds.cmu.web.bean.ErrorCode;
 import com.css.cvds.cmu.web.bean.WVPResult;
 import io.swagger.v3.oas.annotations.Operation;
@@ -48,6 +51,9 @@ public class DeviceConfig {
     @Autowired
     private DeferredResultHolder resultHolder;
 
+	@Autowired
+	private ILogService logService;
+
 	/**
 	 * 看守位控制命令API接口
 	 * @param deviceId 设备ID
@@ -75,6 +81,9 @@ public class DeviceConfig {
         if (logger.isDebugEnabled()) {
 			logger.debug("报警复位API调用");
 		}
+		if (!SecurityUtils.isAdmin()) {
+			throw new ControllerException(ErrorCode.ERROR400.getCode(), "没有权限进行此项操作");
+		}
 		Device device = storager.queryVideoDevice(deviceId);
 		String uuid = UUID.randomUUID().toString();
 		String key = DeferredResultHolder.CALLBACK_CMD_DEVICECONFIG + deviceId + channelId;
@@ -86,6 +95,7 @@ public class DeviceConfig {
 				msg.setData(WVPResult.fail(String.format("设备配置操作失败，错误码： %s, %s", event.statusCode, event.msg)));
 				resultHolder.invokeResult(msg);
 			});
+			logService.addUserLog(UserLogEnum.HARDWARE_CTRL, "配置摄像头参数：" + deviceId);
 		} catch (InvalidArgumentException | SipException | ParseException e) {
 			logger.error("[命令发送失败] 设备配置: {}", e.getMessage());
 			throw new ControllerException(ErrorCode.ERROR100.getCode(), "命令发送失败: " + e.getMessage());
@@ -97,6 +107,7 @@ public class DeviceConfig {
 			msg.setKey(key);
 			msg.setData(WVPResult.fail("设备配置操作超时, 设备未返回应答指令"));
 			resultHolder.invokeResult(msg);
+			logService.addUserLog(UserLogEnum.HARDWARE_CTRL, "配置摄像头参数失败（超时）:" + deviceId);
 		});
 		resultHolder.put(key, uuid, result);
 		return result;

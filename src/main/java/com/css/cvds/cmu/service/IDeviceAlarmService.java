@@ -1,6 +1,7 @@
 package com.css.cvds.cmu.service;
 
 import com.css.cvds.cmu.gb28181.bean.DeviceAlarm;
+import com.css.cvds.cmu.web.bean.DeviceAlarmVO;
 import com.github.pagehelper.PageInfo;
 
 import java.util.List;
@@ -22,10 +23,12 @@ public interface IDeviceAlarmService {
      * @param startTime 开始时间
      * @param endTime 结束时间
      * @param already 是否已处理
+     * @param sortField 排序字段
+     * @param sortMethod 排序方法
      * @return 报警列表
      */
-    PageInfo<DeviceAlarm> getAllAlarm(int page, int count, String deviceId, String alarmPriority, String alarmMethod,
-                                      String alarmType, String startTime, String endTime, Boolean already);
+    PageInfo<DeviceAlarmVO> getAllAlarm(int page, int count, String deviceId, String alarmPriority, String alarmMethod,
+                                        String alarmType, String startTime, String endTime, Boolean already, String sortField, String sortMethod);
 
     /**
      * 根据时间获取报警列表
@@ -34,7 +37,7 @@ public interface IDeviceAlarmService {
      * @param already 是否已处理
      * @return 报警列表
      */
-    List<DeviceAlarm> getAlarm(String startTime, String endTime, Boolean already);
+    List<DeviceAlarmVO> getAlarm(String startTime, String endTime, Boolean already);
 
     /**
      * 根据获取报警类型列表

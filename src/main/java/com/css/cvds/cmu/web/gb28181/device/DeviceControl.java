@@ -9,12 +9,15 @@ package com.css.cvds.cmu.web.gb28181.device;
 
 import com.alibaba.fastjson.JSONObject;
 import com.css.cvds.cmu.conf.exception.ControllerException;
+import com.css.cvds.cmu.conf.security.SecurityUtils;
 import com.css.cvds.cmu.gb28181.bean.Device;
 import com.css.cvds.cmu.gb28181.transmit.callback.DeferredResultHolder;
 import com.css.cvds.cmu.gb28181.transmit.callback.RequestMessage;
 import com.css.cvds.cmu.gb28181.transmit.cmd.impl.SIPCommander;
+import com.css.cvds.cmu.service.ILogService;
 import com.css.cvds.cmu.storager.IVideoManagerStorage;
 
+import com.css.cvds.cmu.utils.UserLogEnum;
 import com.css.cvds.cmu.web.bean.ErrorCode;
 import com.css.cvds.cmu.web.bean.WVPResult;
 import io.swagger.v3.oas.annotations.Operation;
@@ -50,6 +53,9 @@ public class DeviceControl {
     @Autowired
     private DeferredResultHolder resultHolder;
 
+	@Autowired
+	private ILogService logService;
+
     /**
      * 远程启动控制命令API接口
      * 
@@ -65,6 +71,7 @@ public class DeviceControl {
         Device device = storager.queryVideoDevice(deviceId);
 		try {
 			cmder.teleBootCmd(device);
+			logService.addUserLog(UserLogEnum.HARDWARE_CTRL, "重启摄像机:" + deviceId);
 		} catch (InvalidArgumentException | SipException | ParseException e) {
 			logger.error("[命令发送失败] 远程启动: {}", e.getMessage());
 			throw new ControllerException(ErrorCode.ERROR100.getCode(), "命令发送失败: " + e.getMessage());
@@ -89,6 +96,9 @@ public class DeviceControl {
         if (logger.isDebugEnabled()) {
             logger.debug("开始/停止录像API调用");
         }
+		if (!SecurityUtils.isAdmin()) {
+			throw new ControllerException(ErrorCode.ERROR400.getCode(), "没有权限进行此项操作");
+		}
         Device device = storager.queryVideoDevice(deviceId);
 		String uuid = UUID.randomUUID().toString();
 		String key = DeferredResultHolder.CALLBACK_CMD_DEVICECONTROL +  deviceId + channelId;
@@ -136,6 +146,9 @@ public class DeviceControl {
 	public DeferredResult<String> guardApi(@PathVariable String deviceId, String channelId, @PathVariable String guardCmdStr) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("布防/撤防API调用");
+		}
+		if (!SecurityUtils.isAdmin()) {
+			throw new ControllerException(ErrorCode.ERROR400.getCode(), "没有权限进行此项操作");
 		}
 		Device device = storager.queryVideoDevice(deviceId);
 		String key = DeferredResultHolder.CALLBACK_CMD_DEVICECONTROL + deviceId + channelId;
@@ -229,6 +242,9 @@ public class DeviceControl {
 										@RequestParam(required = false) String channelId) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("强制关键帧API调用");
+		}
+		if (!SecurityUtils.isAdmin()) {
+			throw new ControllerException(ErrorCode.ERROR400.getCode(), "没有权限进行此项操作");
 		}
 		Device device = storager.queryVideoDevice(deviceId);
 		try {

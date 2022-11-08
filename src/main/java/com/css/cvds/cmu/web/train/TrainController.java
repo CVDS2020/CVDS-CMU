@@ -1,7 +1,7 @@
 package com.css.cvds.cmu.web.train;
 
-import com.css.cvds.cmu.gb28181.bean.Train;
 import com.css.cvds.cmu.service.ITrainService;
+import com.css.cvds.cmu.service.bean.GPSMsgInfo;
 import com.css.cvds.cmu.web.bean.WVPResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,7 +22,7 @@ public class TrainController {
 
     @GetMapping("/get")
     @Operation(summary = "获取列车信息")
-    public WVPResult<Train> get(){
+    public WVPResult<GPSMsgInfo.Train> get(){
         return WVPResult.success(trainService.get());
     }
 }

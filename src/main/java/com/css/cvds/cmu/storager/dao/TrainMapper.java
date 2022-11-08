@@ -1,6 +1,6 @@
 package com.css.cvds.cmu.storager.dao;
 
-import com.css.cvds.cmu.gb28181.bean.Train;
+import com.css.cvds.cmu.service.bean.GPSMsgInfo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
@@ -14,5 +14,5 @@ import org.springframework.stereotype.Repository;
 public interface TrainMapper {
 
     @Select("SELECT * FROM train WHERE id = 1")
-    Train getById(Integer id);
+    GPSMsgInfo.Train getById(Integer id);
 }

@@ -1,6 +1,7 @@
 package com.css.cvds.cmu.web.user;
 
 import com.css.cvds.cmu.conf.exception.ControllerException;
+import com.css.cvds.cmu.service.ILogService;
 import com.css.cvds.cmu.storager.dao.dto.LogDto;
 import com.css.cvds.cmu.utils.DateUtil;
 import com.css.cvds.cmu.conf.security.SecurityUtils;
@@ -9,6 +10,7 @@ import com.css.cvds.cmu.service.IRoleService;
 import com.css.cvds.cmu.service.IUserService;
 import com.css.cvds.cmu.storager.dao.dto.Role;
 import com.css.cvds.cmu.storager.dao.dto.User;
+import com.css.cvds.cmu.utils.UserLogEnum;
 import com.css.cvds.cmu.web.bean.ErrorCode;
 import com.github.pagehelper.PageInfo;
 
@@ -41,6 +43,9 @@ public class UserController {
     @Autowired
     private IRoleService roleService;
 
+    @Autowired
+    private ILogService logService;
+
     @GetMapping("/login")
     @PostMapping("/login")
     @Operation(summary = "登录")
@@ -56,9 +61,7 @@ public class UserController {
         if (user == null) {
             throw new ControllerException(ErrorCode.ERROR100.getCode(), "用户名或密码错误");
         }
-        LogDto logDto = new LogDto();
-        logDto.setUserId(user.getId());
-        logDto.setCreateTime(new Date());
+        logService.addUserLog(UserLogEnum.ONLINE, "登录系统成功");
 
         return user;
     }
@@ -86,6 +89,7 @@ public class UserController {
             if (!result) {
                 throw new ControllerException(ErrorCode.ERROR100);
             }
+            logService.addUserLog(UserLogEnum.DATA_CONFIG, "修改密码成功");
         } catch (AuthenticationException e) {
             throw new ControllerException(ErrorCode.ERROR100.getCode(), e.getMessage());
         }
@@ -133,6 +137,7 @@ public class UserController {
         if (addResult <= 0) {
             throw new ControllerException(ErrorCode.ERROR100);
         }
+        logService.addUserLog(UserLogEnum.DATA_CONFIG, "添加用户：" + user.getUsername());
     }
 
     @DeleteMapping("/delete")
@@ -154,6 +159,7 @@ public class UserController {
         if (deleteResult <= 0) {
             throw new ControllerException(ErrorCode.ERROR100);
         }
+        logService.addUserLog(UserLogEnum.DATA_CONFIG, "删除用户：" + user.getUsername());
     }
 
     @GetMapping("/all")

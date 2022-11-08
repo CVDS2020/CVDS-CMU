@@ -16,6 +16,8 @@ import com.css.cvds.cmu.storager.dao.DeviceChannelMapper;
 import com.css.cvds.cmu.storager.dao.DeviceMapper;
 import com.css.cvds.cmu.utils.DateUtil;
 import com.css.cvds.cmu.web.bean.BaseTree;
+import com.css.cvds.cmu.web.bean.DeviceDetailsVO;
+import com.css.cvds.cmu.web.bean.VideoConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -280,6 +282,11 @@ public class DeviceServiceImpl implements IDeviceService {
             }
         }
         return device;
+    }
+
+    @Override
+    public void updateConfig(VideoConfig config) {
+
     }
 
     @Override

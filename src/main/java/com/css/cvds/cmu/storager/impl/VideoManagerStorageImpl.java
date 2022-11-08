@@ -1,6 +1,8 @@
 package com.css.cvds.cmu.storager.impl;
 
 import com.css.cvds.cmu.gb28181.bean.*;
+import com.css.cvds.cmu.service.ISuperviseTargetService;
+import com.css.cvds.cmu.service.bean.SuperviseTarget;
 import com.css.cvds.cmu.storager.dao.*;
 import com.css.cvds.cmu.utils.CollectUtils;
 import com.css.cvds.cmu.utils.DateUtil;
@@ -8,6 +10,7 @@ import com.css.cvds.cmu.conf.SipConfig;
 import com.css.cvds.cmu.gb28181.event.EventPublisher;
 import com.css.cvds.cmu.storager.IRedisCatchStorage;
 import com.css.cvds.cmu.storager.IVideoManagerStorage;
+import com.css.cvds.cmu.web.bean.DeviceDetailsVO;
 import com.css.cvds.cmu.web.bean.DeviceVO;
 import com.css.cvds.cmu.web.converter.DeviceConverter;
 import com.github.pagehelper.PageHelper;
@@ -54,6 +57,9 @@ public class VideoManagerStorageImpl implements IVideoManagerStorage {
 
 	@Autowired
 	private DeviceChannelMapper deviceChannelMapper;
+
+	@Autowired
+	private ISuperviseTargetService superviseTargetService;
 
 	@Autowired
 	private DeviceMobilePositionMapper deviceMobilePositionMapper;
@@ -221,13 +227,36 @@ public class VideoManagerStorageImpl implements IVideoManagerStorage {
 		return new PageInfo<>(all);
 	}
 
+	private DeviceVO toVO(Device entity) {
+		DeviceVO vo = DeviceConverter.INSTANCE.toVo(entity);
+		if (Objects.nonNull(entity.getSuperviseTargetId())) {
+			SuperviseTarget target = superviseTargetService.getById(entity.getSuperviseTargetId());
+			if (Objects.nonNull(target)) {
+				vo.setSuperviseTargetName(target.getTypeName());
+				vo.setSuperviseTargetName(target.getName());
+				vo.setSuperviseTargetStatus(target.getStatus());
+				vo.setSuperviseTargetStatusText(target.getStatusText());
+			}
+		}
+		return vo;
+	}
+
 	@Override
 	public PageInfo<DeviceVO> queryDeviceList(int page, int count,
 									   String keyword, Boolean online, Integer carriageNo, Integer superviseTargetType) {
 		PageHelper.startPage(page, count);
 		List<Device> all = deviceMapper.getDevices(keyword, online, carriageNo, superviseTargetType);
-		List<DeviceVO> voList = CollectUtils.toList(all, DeviceConverter.INSTANCE::toVo);
+		List<DeviceVO> voList = CollectUtils.toList(all, this::toVO);
 		return new PageInfo<>(voList);
+	}
+
+	@Override
+	public DeviceDetailsVO queryDeviceDetailsById(Long id) {
+		DeviceDetailsVO vo = DeviceConverter.INSTANCE.toDetailsVo(this.toVO(deviceMapper.getDeviceById(id)));
+		// 获取视频配置信息
+		vo.setVideoConfig(null);
+
+		return vo;
 	}
 
 	/**

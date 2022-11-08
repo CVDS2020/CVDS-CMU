@@ -1,6 +1,7 @@
 package com.css.cvds.cmu.web.log;
 
 import com.css.cvds.cmu.conf.exception.ControllerException;
+import com.css.cvds.cmu.conf.security.SecurityUtils;
 import com.css.cvds.cmu.storager.dao.dto.LogDto;
 import com.css.cvds.cmu.utils.DateUtil;
 import com.css.cvds.cmu.web.bean.ErrorCode;
@@ -55,7 +56,7 @@ public class LogController {
             @RequestParam int page,
             @RequestParam int count,
             @RequestParam(required = false)  String query,
-            @RequestParam(required = false) int type,
+            @RequestParam(required = false) Integer type,
             @RequestParam(required = false) String startTime,
             @RequestParam(required = false) String endTime
     ) {
@@ -130,6 +131,9 @@ public class LogController {
     @Operation(summary = "清空访问日志")
     @DeleteMapping("/access/clear")
     public void clear() {
+        if (!SecurityUtils.isAdmin()) {
+            throw new ControllerException(ErrorCode.ERROR400.getCode(), "没有权限进行此项操作");
+        }
         logService.clearAccessLog();
     }
 

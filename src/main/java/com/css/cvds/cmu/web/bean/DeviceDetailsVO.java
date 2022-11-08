@@ -11,4 +11,12 @@ public class DeviceDetailsVO extends DeviceVO {
 
     @Schema(description = "视频配置")
     private VideoConfig videoConfig;
+
+    public VideoConfig getVideoConfig() {
+        return videoConfig;
+    }
+
+    public void setVideoConfig(VideoConfig videoConfig) {
+        this.videoConfig = videoConfig;
+    }
 }

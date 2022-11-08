@@ -88,7 +88,7 @@ public class DateUtil {
         try {
             LocalDate.parse(timeStr, dateTimeFormatter);
             return true;
-        }catch (DateTimeParseException exception) {
+        } catch (DateTimeParseException exception) {
             return false;
         }
     }

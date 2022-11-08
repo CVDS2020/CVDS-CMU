@@ -11,7 +11,9 @@ import com.css.cvds.cmu.gb28181.transmit.callback.DeferredResultHolder;
 import com.css.cvds.cmu.gb28181.transmit.callback.RequestMessage;
 import com.css.cvds.cmu.gb28181.transmit.cmd.impl.SIPCommander;
 import com.css.cvds.cmu.service.IDeviceService;
+import com.css.cvds.cmu.service.ILogService;
 import com.css.cvds.cmu.storager.IVideoManagerStorage;
+import com.css.cvds.cmu.utils.UserLogEnum;
 import com.css.cvds.cmu.web.bean.ErrorCode;
 import com.github.pagehelper.util.StringUtil;
 
@@ -54,6 +56,9 @@ public class MobilePositionController {
 
 	@Autowired
 	private IDeviceService deviceService;
+
+    @Autowired
+    private ILogService logService;
 
     /**
      * 查询历史轨迹
@@ -158,5 +163,6 @@ public class MobilePositionController {
         if (!deviceService.removeMobilePositionSubscribe(device)) {
             throw new ControllerException(ErrorCode.ERROR100);
         }
+        logService.addUserLog(UserLogEnum.HARDWARE_CTRL, "订阅位置信息：" + deviceId);
     }
 }

@@ -16,8 +16,11 @@ import com.css.cvds.cmu.gb28181.session.SsrcConfig;
 import com.css.cvds.cmu.gb28181.session.VideoStreamSessionManager;
 import com.css.cvds.cmu.gb28181.transmit.cmd.impl.SIPCommander;
 import com.css.cvds.cmu.media.css.MediaServerItem;
+import com.css.cvds.cmu.service.ILogService;
 import com.css.cvds.cmu.storager.IRedisCatchStorage;
 import com.css.cvds.cmu.storager.IVideoManagerStorage;
+import com.css.cvds.cmu.utils.SysLogEnum;
+import com.css.cvds.cmu.utils.UserLogEnum;
 import com.css.cvds.cmu.web.bean.ErrorCode;
 import com.css.cvds.cmu.web.bean.WVPResult;
 import com.css.cvds.cmu.service.IDeviceService;
@@ -65,6 +68,9 @@ public class PlayServiceImpl implements IPlayService {
 
     @Autowired
     private UserSetting userSetting;
+
+    @Autowired
+    private ILogService logService;
 
     @Override
     public void play(MediaServerItem mediaServerItem, Device device, String channelId,
@@ -141,24 +147,29 @@ public class PlayServiceImpl implements IPlayService {
                 new DeferredResult<>(userSetting.getPlayTimeout().longValue() + 10);
 
         resultDeferredResult.onTimeout(()->{
+            logService.addSysLog(SysLogEnum.STREAM, "启动推流超时：" + deviceId);
             logger.info("等待超时");
             resultDeferredResult.setResult(WVPResult.fail(ErrorCode.ERROR100.getCode(), "超时"));
         });
 
         Device device = deviceService.queryDevice(deviceId);
         if (device == null ) {
+            logService.addSysLog(SysLogEnum.STREAM, "启动推流失败：" + deviceId);
             resultDeferredResult.setResult(WVPResult.fail(ErrorCode.ERROR100.getCode(), "device[ " + deviceId + " ]未找到"));
             return resultDeferredResult;
         } else if (device.getOnline() == 0) {
+            logService.addSysLog(SysLogEnum.STREAM, "启动推流失败（设备不在线）：" + deviceId);
             resultDeferredResult.setResult(WVPResult.fail(ErrorCode.ERROR100.getCode(), "device[ " + channelId + " ]offline"));
             return resultDeferredResult;
         }
 
         DeviceChannel deviceChannel = storager.queryChannel(deviceId, channelId);
         if (deviceChannel == null) {
+            logService.addSysLog(SysLogEnum.STREAM, "启动推流失败（未找到通道）：" + deviceId);
             resultDeferredResult.setResult(WVPResult.fail(ErrorCode.ERROR400.getCode(), "channel[ " + channelId + " ]未找到"));
             return resultDeferredResult;
         } else if (deviceChannel.getStatus() == 0) {
+            logService.addSysLog(SysLogEnum.STREAM, "启动推流失败（通道不在线）：" + deviceId);
             resultDeferredResult.setResult(WVPResult.fail(ErrorCode.ERROR100.getCode(), "channel[ " + channelId + " ]offline"));
             return resultDeferredResult;
         }
@@ -207,7 +218,9 @@ public class PlayServiceImpl implements IPlayService {
             }
             result.put("sdp", contentString);
             resultDeferredResult.setResult(WVPResult.success(result));
+            logService.addSysLog(SysLogEnum.STREAM, "启动推流成功：" + deviceId);
         }, (eventResult) -> {
+            logService.addSysLog(SysLogEnum.STREAM, "启动推流失败：" + deviceId);
             resultDeferredResult.setResult(WVPResult.fail(ErrorCode.ERROR100.getCode(),
                     "channel[ " + channelId + " ] " + eventResult.msg));
         });
@@ -229,6 +242,7 @@ public class PlayServiceImpl implements IPlayService {
         } catch (InvalidArgumentException | ParseException | SipException | SsrcTransactionNotFoundException e) {
             return WVPResult.fail(ErrorCode.ERROR100.getCode(), "发送BYE失败：" + e.getMessage());
         }
+        logService.addSysLog(SysLogEnum.STREAM, "停止推流：" + deviceId);
         redisCatchStorage.stopPlay(streamInfo);
         storager.stopPlay(streamInfo.getDeviceId(), streamInfo.getChannelId());
         return WVPResult.success(null);

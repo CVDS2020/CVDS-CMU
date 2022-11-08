@@ -1,4 +1,4 @@
-package com.css.cvds.cmu.gb28181.bean;
+package com.css.cvds.cmu.service.bean;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -16,6 +16,9 @@ public class SuperviseTarget {
 
     @Schema(description = "监视物类型")
     private Integer type;
+
+    @Schema(description = "监视物类型名称")
+    private String typeName;
 
     @Schema(description = "监视物所在车厢")
     private Integer carriageNo;
@@ -98,5 +101,13 @@ public class SuperviseTarget {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getTypeName() {
+        return typeName;
+    }
+
+    public void setTypeName(String typeName) {
+        this.typeName = typeName;
     }
 }

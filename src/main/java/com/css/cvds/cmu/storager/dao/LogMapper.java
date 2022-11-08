@@ -30,7 +30,7 @@ public interface LogMapper {
             " <if test=\"endTime != null\" >  AND createTime &lt;= '${endTime}' </if>" +
             " ORDER BY createTime DESC " +
             " </script>"})
-    List<LogDto> query(String query, int type, String startTime, String endTime);
+    List<LogDto> query(String query, Integer type, String startTime, String endTime);
 
     @Delete("DELETE FROM log")
     int clear();

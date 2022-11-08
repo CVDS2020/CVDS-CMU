@@ -1,33 +1,43 @@
 package com.css.cvds.cmu.storager.dao.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.Date;
 
 /**
  * @author chend
  */
+@Schema(description = "Log信息")
 public class LogDto {
 
-    private long id;
-    private int type;
+    @Schema(description = "ID")
+    private Long id;
+    @Schema(description = "类型 0-系统日志，1-操作日志")
+    private Integer type;
+    @Schema(description = "标题/事件")
     private String title;
+    @Schema(description = "内容")
     private String content;
-    private int userId;
+    @Schema(description = "用户ID")
+    private Integer userId;
+    @Schema(description = "用户名")
     private String username;
+    @Schema(description = "日志时间")
     private Date createTime;
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public int getType() {
+    public Integer getType() {
         return type;
     }
 
-    public void setType(int type) {
+    public void setType(Integer type) {
         this.type = type;
     }
 
@@ -63,11 +73,11 @@ public class LogDto {
         this.content = content;
     }
 
-    public int getUserId() {
+    public Integer getUserId() {
         return userId;
     }
 
-    public void setUserId(int userId) {
+    public void setUserId(Integer userId) {
         this.userId = userId;
     }
 }

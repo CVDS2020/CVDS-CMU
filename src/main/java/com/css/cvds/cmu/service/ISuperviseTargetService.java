@@ -1,15 +1,14 @@
 package com.css.cvds.cmu.service;
 
-import com.css.cvds.cmu.gb28181.bean.SuperviseTarget;
-import com.css.cvds.cmu.gb28181.bean.SuperviseTargetType;
-import com.css.cvds.cmu.gb28181.bean.Train;
+import com.css.cvds.cmu.service.bean.SuperviseTarget;
+import com.css.cvds.cmu.service.bean.SuperviseTargetType;
 
 import java.util.List;
 
 /**
  * 监视物
  */
-public interface ISuperviseTarget {
+public interface ISuperviseTargetService {
 
     /**
      * 监视物类型列表
@@ -19,7 +18,15 @@ public interface ISuperviseTarget {
 
     /**
      * 监视物列表
+     * @param type 监视物类型
      * @return  SuperviseTarget
      */
     List<SuperviseTarget> getList(Integer type);
+
+    /**
+     * 监视物
+     * @param id id
+     * @return  SuperviseTarget
+     */
+    SuperviseTarget getById(Integer id);
 }

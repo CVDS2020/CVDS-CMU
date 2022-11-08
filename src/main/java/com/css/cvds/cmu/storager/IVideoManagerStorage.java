@@ -1,6 +1,7 @@
 package com.css.cvds.cmu.storager;
 
 import com.css.cvds.cmu.gb28181.bean.*;
+import com.css.cvds.cmu.web.bean.DeviceDetailsVO;
 import com.css.cvds.cmu.web.bean.DeviceVO;
 import com.github.pagehelper.PageInfo;
 
@@ -91,7 +92,14 @@ public interface IVideoManagerStorage {
 	PageInfo<DeviceVO> queryDeviceList(int page, int count,
 											String keyword, Boolean online, Integer carriageNo, Integer superviseTargetType);
 
-	/**   
+	/**
+	 * 查询设备信息
+	 * @param id 数据库id
+	 * @return 设备信息
+	 */
+	DeviceDetailsVO queryDeviceDetailsById(Long id);
+
+	/**
 	 * 删除设备
 	 * 
 	 * @param deviceId 设备ID

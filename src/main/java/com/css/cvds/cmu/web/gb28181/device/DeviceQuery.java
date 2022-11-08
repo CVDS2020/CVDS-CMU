@@ -13,9 +13,11 @@ import com.css.cvds.cmu.gb28181.transmit.callback.RequestMessage;
 import com.css.cvds.cmu.gb28181.transmit.cmd.impl.SIPCommander;
 import com.css.cvds.cmu.service.IDeviceChannelService;
 import com.css.cvds.cmu.service.IDeviceService;
+import com.css.cvds.cmu.service.ILogService;
 import com.css.cvds.cmu.storager.IRedisCatchStorage;
 import com.css.cvds.cmu.storager.IVideoManagerStorage;
 import com.css.cvds.cmu.utils.DateUtil;
+import com.css.cvds.cmu.utils.UserLogEnum;
 import com.css.cvds.cmu.web.bean.*;
 import com.css.cvds.cmu.web.converter.DeviceConverter;
 import com.github.pagehelper.PageInfo;
@@ -65,6 +67,9 @@ public class DeviceQuery {
 	@Autowired
 	private DynamicTask dynamicTask;
 
+	@Autowired
+	private ILogService logService;
+
 	/**
 	 * 使用ID查询设备
 	 * @param id 数据库ID
@@ -74,11 +79,7 @@ public class DeviceQuery {
 	@Parameter(name = "id", description = "数据库ID", required = true)
 	@GetMapping("/devices/{id}")
 	public WVPResult<DeviceDetailsVO> devices(@PathVariable Long id){
-		Device device = deviceService.queryDeviceById(id);
-		if (Objects.isNull(device)) {
-			return WVPResult.success();
-		}
-		return WVPResult.success(DeviceConverter.INSTANCE.toDetailsVo(device));
+		return WVPResult.success(storager.queryDeviceDetailsById(id));
 	}
 
 	/**
@@ -139,6 +140,8 @@ public class DeviceQuery {
 		}
 		deviceService.sync(device);
 
+		logService.addUserLog(UserLogEnum.HARDWARE_CTRL, "同步摄像机通道信息" + deviceId);
+
 		WVPResult<SyncStatus> wvpResult = new WVPResult<>();
 		wvpResult.setCode(0);
 		wvpResult.setMessage("开始同步");
@@ -152,7 +155,6 @@ public class DeviceQuery {
 	 */
 	@Operation(summary = "添加设备")
 	@PostMapping(value = "/devices/add")
-	@ResponseBody
 	public WVPResult<?> add(@RequestBody @Validated DeviceDTO addDeviceParam) {
 		if (!SecurityUtils.isAdmin()) {
 			throw new ControllerException(ErrorCode.ERROR400.getCode(), "没有权限进行此项操作");
@@ -181,6 +183,8 @@ public class DeviceQuery {
 
 		deviceService.add(device);
 
+		logService.addUserLog(UserLogEnum.DATA_CONFIG, "添加摄像机：" + addDeviceParam.getIp());
+
 		return WVPResult.success(null);
 	}
 
@@ -192,7 +196,6 @@ public class DeviceQuery {
 	@Operation(summary = "编辑设备")
 	@Parameter(name = "id", description = "数据库id", required = true)
 	@PostMapping(value = "/devices/{id}/update")
-	@ResponseBody
 	public WVPResult<?> update(@PathVariable Long id, @RequestBody DeviceDTO addDeviceParam) {
 		if (!SecurityUtils.isAdmin()) {
 			throw new ControllerException(ErrorCode.ERROR400.getCode(), "没有权限进行此项操作");
@@ -207,6 +210,8 @@ public class DeviceQuery {
 		device.setUpdateTime(DateUtil.getNow());
 		deviceService.updateDeviceById(device);
 
+		logService.addUserLog(UserLogEnum.DATA_CONFIG, "修改摄像机：" + device.getIp());
+
 		return WVPResult.success(null);
 	}
 
@@ -219,6 +224,9 @@ public class DeviceQuery {
 	@Parameter(name = "id", description = "数据库ID", required = true)
 	@DeleteMapping("/devices/{id}/delete")
 	public WVPResult<?> delete(@PathVariable Long id) {
+		if (!SecurityUtils.isAdmin()) {
+			throw new ControllerException(ErrorCode.ERROR400.getCode(), "没有权限进行此项操作");
+		}
 		Device device = deviceService.queryDeviceById(id);
 		if (Objects.isNull(device)) {
 			throw new ControllerException(ErrorCode.ERROR101.getCode(), "摄像头不存在！");
@@ -227,12 +235,11 @@ public class DeviceQuery {
 		if (logger.isDebugEnabled()) {
 			logger.debug("设备信息删除API调用，deviceId：" + deviceId);
 		}
-		if (!SecurityUtils.isAdmin()) {
-			throw new ControllerException(ErrorCode.ERROR400.getCode(), "没有权限进行此项操作");
-		}
 		// 清除redis记录
 		boolean isSuccess = storager.delete(deviceId);
 		if (isSuccess) {
+			logService.addUserLog(UserLogEnum.DATA_CONFIG, "删除摄像机：" + device.getIp());
+
 			redisCatchStorage.clearCatchByDeviceId(deviceId);
 			// 停止此设备的订阅更新
 			Set<String> allKeys = dynamicTask.getAllKeys();
@@ -263,13 +270,60 @@ public class DeviceQuery {
 	 */
 	@Operation(summary = "更新通道信息")
 	@Parameter(name = "deviceId", description = "设备编号", required = true)
-	@Parameter(name = "channel", description = "通道信息", required = true)
 	@PostMapping("/channel/update/{deviceId}")
-	public WVPResult<?> updateChannel(@PathVariable String deviceId,DeviceChannel channel) {
+	public WVPResult<?> updateChannel(@PathVariable String deviceId, @RequestBody DeviceChannel channel) {
 		if (!SecurityUtils.isAdmin()) {
 			throw new ControllerException(ErrorCode.ERROR400.getCode(), "没有权限进行此项操作");
 		}
+		logService.addUserLog(UserLogEnum.DATA_CONFIG, "更新摄像机通道信息：" + deviceId);
+
 		deviceChannelService.updateChannel(deviceId, channel);
+		return WVPResult.success(null);
+	}
+
+	@Operation(summary = "更新视频配置信息")
+	@Parameter(name = "deviceId", description = "设备国标ID", required = true)
+	@PostMapping("/videoConfig/{deviceId}")
+	public WVPResult<?> updateDeviceVideoConfig(@PathVariable String deviceId,
+												@RequestBody VideoConfig config) {
+		if (!SecurityUtils.isAdmin()) {
+			throw new ControllerException(ErrorCode.ERROR400.getCode(), "没有权限进行此项操作");
+		}
+		Device device = deviceService.queryDevice(deviceId);
+		if (device == null) {
+			throw new ControllerException(ErrorCode.ERROR100.getCode(), "设备不存在");
+		}
+		deviceService.updateConfig(config);
+
+		logService.addUserLog(UserLogEnum.DATA_CONFIG, "更新视频配置信息：" + deviceId);
+
+		return WVPResult.success(null);
+	}
+
+	@Operation(summary = "获取视频配置信息")
+	@Parameter(name = "deviceId", description = "设备国标ID", required = true)
+	@GetMapping("/videoConfig/{deviceId}")
+	public WVPResult<VideoConfig> getDeviceVideoConfig(@PathVariable String deviceId) {
+		Device device = deviceService.queryDevice(deviceId);
+		if (device == null) {
+			throw new ControllerException(ErrorCode.ERROR100.getCode(), "设备不存在");
+		}
+		return WVPResult.success(new VideoConfig());
+	}
+
+	@Operation(summary = "重置视频配置信息")
+	@Parameter(name = "deviceId", description = "设备国标ID", required = true)
+	@PutMapping("/videoConfig/{deviceId}/reset")
+	public WVPResult<?> resetDeviceVideoConfig(@PathVariable String deviceId) {
+		if (!SecurityUtils.isAdmin()) {
+			throw new ControllerException(ErrorCode.ERROR400.getCode(), "没有权限进行此项操作");
+		}
+		Device device = deviceService.queryDevice(deviceId);
+		if (device == null) {
+			throw new ControllerException(ErrorCode.ERROR100.getCode(), "设备不存在");
+		}
+		logService.addUserLog(UserLogEnum.DATA_CONFIG, "重置视频配置信息：" + deviceId);
+
 		return WVPResult.success(null);
 	}
 
@@ -289,49 +343,10 @@ public class DeviceQuery {
 			throw new ControllerException(ErrorCode.ERROR400.getCode(), "没有权限进行此项操作");
 		}
 		Device device = storager.queryVideoDevice(deviceId);
-		device.setStreamMode(streamMode);
-		deviceService.updateDevice(device);
-		return WVPResult.success(null);
-	}
-
-	@Operation(summary = "获取视频配置信息")
-	@Parameter(name = "deviceId", description = "设备国标ID", required = true)
-	@Parameter(name = "config", description = "视频配置信息", required = true)
-	@GetMapping("/videoConfig/{deviceId}")
-	public WVPResult<VideoConfig> getDeviceVideoConfig(@PathVariable String deviceId) {
-		Device device = deviceService.queryDevice(deviceId);
-		if (device == null) {
-			throw new ControllerException(ErrorCode.ERROR100.getCode(), "设备不存在");
-		}
-		return WVPResult.success(new VideoConfig());
-	}
-
-	@Operation(summary = "更新视频配置信息")
-	@Parameter(name = "deviceId", description = "设备国标ID", required = true)
-	@Parameter(name = "config", description = "视频配置信息", required = true)
-	@PutMapping("/videoConfig/{deviceId}")
-	public WVPResult<?> updateDeviceVideoConfig(@PathVariable String deviceId,
-												@RequestBody VideoConfig config) {
-		if (!SecurityUtils.isAdmin()) {
-			throw new ControllerException(ErrorCode.ERROR400.getCode(), "没有权限进行此项操作");
-		}
-		Device device = deviceService.queryDevice(deviceId);
-		if (device == null) {
-			throw new ControllerException(ErrorCode.ERROR100.getCode(), "设备不存在");
-		}
-		return WVPResult.success(null);
-	}
-
-	@Operation(summary = "重置视频配置信息")
-	@Parameter(name = "deviceId", description = "设备国标ID", required = true)
-	@PutMapping("/videoConfig/{deviceId}/reset")
-	public WVPResult<?> resetDeviceVideoConfig(@PathVariable String deviceId) {
-		if (!SecurityUtils.isAdmin()) {
-			throw new ControllerException(ErrorCode.ERROR400.getCode(), "没有权限进行此项操作");
-		}
-		Device device = deviceService.queryDevice(deviceId);
-		if (device == null) {
-			throw new ControllerException(ErrorCode.ERROR100.getCode(), "设备不存在");
+		if (Objects.equals(device.getStreamMode(), streamMode)) {
+			device.setStreamMode(streamMode);
+			deviceService.updateDevice(device);
+			logService.addUserLog(UserLogEnum.DATA_CONFIG, "修改摄像机数据传输模式：" + deviceId);
 		}
 		return WVPResult.success(null);
 	}
@@ -390,7 +405,9 @@ public class DeviceQuery {
 		if (channelSyncStatus == null) {
 			wvpResult.setCode(-1);
 			wvpResult.setMessage("同步尚未开始");
-		}else {
+		} else {
+			logService.addUserLog(UserLogEnum.HARDWARE_CTRL, "同步摄像机状态：" + deviceId);
+
 			wvpResult.setCode(ErrorCode.SUCCESS.getCode());
 			wvpResult.setMessage(ErrorCode.SUCCESS.getMsg());
 			wvpResult.setData(channelSyncStatus);

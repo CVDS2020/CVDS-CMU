@@ -1,8 +1,7 @@
 package com.css.cvds.cmu.web.statistics;
 
-import com.css.cvds.cmu.gb28181.bean.Statistics;
+import com.css.cvds.cmu.service.bean.Statistics;
 import com.css.cvds.cmu.service.IDeviceService;
-import com.css.cvds.cmu.web.bean.ErrorCode;
 import com.css.cvds.cmu.web.bean.WVPResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

@@ -3,12 +3,15 @@ package com.css.cvds.cmu.web.server;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.css.cvds.cmu.conf.exception.ControllerException;
+import com.css.cvds.cmu.conf.security.SecurityUtils;
+import com.css.cvds.cmu.service.ILogService;
 import com.css.cvds.cmu.utils.SpringBeanFactory;
 import com.css.cvds.cmu.VManageBootstrap;
 import com.css.cvds.cmu.common.VersionPo;
 import com.css.cvds.cmu.conf.SipConfig;
 import com.css.cvds.cmu.conf.UserSetting;
 import com.css.cvds.cmu.conf.VersionInfo;
+import com.css.cvds.cmu.utils.UserLogEnum;
 import com.css.cvds.cmu.web.bean.ErrorCode;
 import gov.nist.javax.sip.SipStackImpl;
 
@@ -42,6 +45,9 @@ public class ServerController {
     @Autowired
     private UserSetting userSetting;
 
+    @Autowired
+    private ILogService logService;
+
     @Value("${server.port}")
     private int serverPort;
 
@@ -52,6 +58,11 @@ public class ServerController {
     @GetMapping(value = "/restart")
     @ResponseBody
     public void restart() {
+        if (!SecurityUtils.isAdmin()) {
+            throw new ControllerException(ErrorCode.ERROR400.getCode(), "没有权限进行此项操作");
+        }
+
+        logService.addUserLog(UserLogEnum.RESET, "重启CVDS-CMU服务");
         taskExecutor.execute(()-> {
             try {
                 Thread.sleep(3000);

@@ -1,4 +1,4 @@
-package com.css.cvds.cmu.gb28181.bean;
+package com.css.cvds.cmu.service.bean;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 

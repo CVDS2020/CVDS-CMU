@@ -25,4 +25,52 @@ public class VideoConfig {
 
     @Schema(description = "饱和度")
     private Integer saturation;
+
+    public String getEncoder() {
+        return encoder;
+    }
+
+    public void setEncoder(String encoder) {
+        this.encoder = encoder;
+    }
+
+    public Integer getWidth() {
+        return width;
+    }
+
+    public void setWidth(Integer width) {
+        this.width = width;
+    }
+
+    public Integer getHeight() {
+        return height;
+    }
+
+    public void setHeight(Integer height) {
+        this.height = height;
+    }
+
+    public Integer getBrightness() {
+        return brightness;
+    }
+
+    public void setBrightness(Integer brightness) {
+        this.brightness = brightness;
+    }
+
+    public Integer getContrast() {
+        return contrast;
+    }
+
+    public void setContrast(Integer contrast) {
+        this.contrast = contrast;
+    }
+
+    public Integer getSaturation() {
+        return saturation;
+    }
+
+    public void setSaturation(Integer saturation) {
+        this.saturation = saturation;
+    }
 }

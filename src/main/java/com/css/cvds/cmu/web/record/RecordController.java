@@ -50,8 +50,10 @@ public class RecordController {
     @Operation(summary = "下载视频")
     @Parameter(name = "startTime", description = "开始时间", required = true)
     @Parameter(name = "endTime", description = "结束时间", required = true)
-    @Parameter(name = "deviceId", description = "设备国标ID", required = false)
-    public DeferredResult<WVPResult<DownloadInfo>> export(String startTime, String endTime, String deviceId) {
+    @Parameter(name = "deviceType", description = "类型：0-全部，1-摄像头，2-监视物", required = true)
+    @Parameter(name = "deviceId", description = "deviceType为1时为摄像头国标ID，deviceType为2时为监视物ID", required = false)
+    public DeferredResult<WVPResult<DownloadInfo>> export(String startTime, String endTime,
+                                                          Integer deviceType, String deviceId) {
         DeferredResult<WVPResult<DownloadInfo>> resultDeferredResult =
                 new DeferredResult<>(30 * 1000L);
 

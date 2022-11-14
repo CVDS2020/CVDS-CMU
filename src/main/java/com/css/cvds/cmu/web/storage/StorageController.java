@@ -38,7 +38,7 @@ public class StorageController {
     @Parameter(name = "count", description = "每页查询数量", required = true)
     public DeferredResult<WVPResult<Disk>> list(@RequestParam(required = false)Integer page,
                                                 @RequestParam(required = false)Integer count,
-                                                Integer diskNo, Integer status, Integer type) {
+                                                String diskNo, Integer status, Integer type) {
         DeferredResult<WVPResult<Disk>> resultDeferredResult =
                 new DeferredResult<>(30 * 1000L);
 
@@ -51,6 +51,17 @@ public class StorageController {
         resultDeferredResult.setResult(WVPResult.success(disk));
 
         return resultDeferredResult;
+    }
+
+    @PutMapping("/disk/initialize")
+    @Operation(summary = "格式化磁盘")
+    @Parameter(name = "diskNo", description = "磁盘号")
+    public WVPResult<?> initialize(String diskNo) {
+        if (!SecurityUtils.isAdmin()) {
+            throw new ControllerException(ErrorCode.ERROR400.getCode(), "没有权限进行此项操作");
+        }
+        logService.addUserLog(UserLogEnum.DATA_CONFIG, "格式化磁盘：" + diskNo);
+        return WVPResult.success(null);
     }
 
     @GetMapping("/config")
@@ -68,7 +79,7 @@ public class StorageController {
         if (!SecurityUtils.isAdmin()) {
             throw new ControllerException(ErrorCode.ERROR400.getCode(), "没有权限进行此项操作");
         }
-        logService.addUserLog(UserLogEnum.DATA_CONFIG, "更新存储撇账号");
+        logService.addUserLog(UserLogEnum.DATA_CONFIG, "更新存储配置");
         return WVPResult.success(null);
     }
 }

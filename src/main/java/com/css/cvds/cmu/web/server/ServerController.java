@@ -1,55 +1,42 @@
 package com.css.cvds.cmu.web.server;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import com.css.cvds.cmu.VManageBootstrap;
 import com.css.cvds.cmu.conf.exception.ControllerException;
 import com.css.cvds.cmu.conf.security.SecurityUtils;
 import com.css.cvds.cmu.service.ILogService;
+import com.css.cvds.cmu.utils.BoardCardEnum;
+import com.css.cvds.cmu.utils.CollectUtils;
 import com.css.cvds.cmu.utils.SpringBeanFactory;
-import com.css.cvds.cmu.VManageBootstrap;
-import com.css.cvds.cmu.common.VersionPo;
-import com.css.cvds.cmu.conf.SipConfig;
-import com.css.cvds.cmu.conf.UserSetting;
-import com.css.cvds.cmu.conf.VersionInfo;
 import com.css.cvds.cmu.utils.UserLogEnum;
+import com.css.cvds.cmu.web.bean.BoardCard;
 import com.css.cvds.cmu.web.bean.ErrorCode;
+import com.css.cvds.cmu.web.bean.SystemInfo;
+import com.css.cvds.cmu.web.bean.WVPResult;
 import gov.nist.javax.sip.SipStackImpl;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.sip.ListeningPoint;
 import javax.sip.ObjectInUseException;
 import javax.sip.SipProvider;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
 @SuppressWarnings("rawtypes")
-@Tag(name = "服务控制")
+@Tag(name = "系统管理")
 @CrossOrigin
 @RestController
-@RequestMapping("/api/server")
+@RequestMapping("/api/system")
 public class ServerController {
 
     @Autowired
-    private VersionInfo versionInfo;
-
-    @Autowired
-    private SipConfig sipConfig;
-
-    @Autowired
-    private UserSetting userSetting;
-
-    @Autowired
     private ILogService logService;
-
-    @Value("${server.port}")
-    private int serverPort;
 
     @Autowired
     private ThreadPoolTaskExecutor taskExecutor;
@@ -84,36 +71,65 @@ public class ServerController {
         });
     };
 
-    @Operation(summary = "获取版本信息")
-    @GetMapping(value = "/version")
-    @ResponseBody
-    public VersionPo VersionPogetVersion() {
-        return versionInfo.getVersion();
+    @GetMapping("/info")
+    @Operation(summary = "获取系统信息")
+    public WVPResult<SystemInfo> info() {
+
+        SystemInfo info = new SystemInfo();
+        info.setTypeCode("cvds-cmu");
+        info.setManufacturerCode("CSS-CVDS-CMU");
+        info.setSoftwareVersion("1.0");
+        info.setFirmwareVersion("1.0");
+
+        return WVPResult.success(info);
     }
 
-    @GetMapping(value = "/config")
-    @Operation(summary = "获取版本信息")
-    @Parameter(name = "type", description = "配置类型（sip, base）", required = true)
-    @ResponseBody
-    public JSONObject getVersion(String type) {
+    @PutMapping("/correction")
+    @Operation(summary = "校时")
+    @Parameter(name = "type", description = "类型（0:自动，1:手动）", required = true)
+    @Parameter(name = "time", description = "时间（格式：yyyy-mm-dd HH:MM:SS）", required = false)
+    public WVPResult<?> correction(Integer type, String time) {
+        return WVPResult.success();
+    }
 
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("server.port", serverPort);
-        if (ObjectUtils.isEmpty(type)) {
-            jsonObject.put("sip", JSON.toJSON(sipConfig));
-            jsonObject.put("base", JSON.toJSON(userSetting));
-        } else {
-            switch (type) {
-                case "sip":
-                    jsonObject.put("sip", sipConfig);
-                    break;
-                case "base":
-                    jsonObject.put("base", userSetting);
-                    break;
-                default:
-                    break;
-            }
-        }
-        return jsonObject;
+    @GetMapping("/board/list")
+    @Operation(summary = "获取板卡列表")
+    public DeferredResult<WVPResult<List<BoardCard>>> boardList() {
+
+        DeferredResult<WVPResult<List<BoardCard>>> resultDeferredResult =
+                new DeferredResult<>(30 * 1000L);
+
+        resultDeferredResult.onTimeout(() -> {
+            resultDeferredResult.setResult(WVPResult.fail(ErrorCode.ERROR100.getCode(), "超时"));
+        });
+
+        List<BoardCard> boardCardList = CollectUtils.toList(Arrays.asList(BoardCardEnum.values()), e -> {
+            BoardCard boardCard = new BoardCard();
+            boardCard.setType(e.getType());
+            boardCard.setName(e.getName());
+            boardCard.setStatus(0);
+            return boardCard;
+        });
+
+        resultDeferredResult.setResult(WVPResult.success(boardCardList));
+
+        return resultDeferredResult;
+    }
+
+    @PutMapping("/board/ctrl")
+    @Operation(summary = "板卡控制")
+    @Parameter(name = "ctrl", description = "类型（0:关机，1:开机，2:重启）", required = true)
+    public DeferredResult<WVPResult<?>> boardCtrl() {
+
+        DeferredResult<WVPResult<?>> resultDeferredResult =
+                new DeferredResult<>(30 * 1000L);
+
+        resultDeferredResult.onTimeout(() -> {
+            resultDeferredResult.setResult(WVPResult.fail(ErrorCode.ERROR100.getCode(), "超时"));
+        });
+
+        resultDeferredResult.setResult(WVPResult.success());
+
+        return resultDeferredResult;
     }
 }

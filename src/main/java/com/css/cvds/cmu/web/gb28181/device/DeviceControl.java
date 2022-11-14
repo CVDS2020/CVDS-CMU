@@ -79,6 +79,29 @@ public class DeviceControl {
 		return WVPResult.success();
     }
 
+	/**
+	 * 远程启动控制命令API接口
+	 *
+	 * @param deviceId 设备ID
+	 */
+	@Operation(summary = "远程关闭控制命令")
+	@Parameter(name = "deviceId", description = "设备编号", required = true)
+	@GetMapping("/closeboot/{deviceId}")
+	public WVPResult<?> closeBootApi(@PathVariable String deviceId) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("设备远程关闭API调用");
+		}
+		Device device = storager.queryVideoDevice(deviceId);
+		try {
+			cmder.teleBootCmd(device);
+			logService.addUserLog(UserLogEnum.HARDWARE_CTRL, "关闭摄像机:" + deviceId);
+		} catch (InvalidArgumentException | SipException | ParseException e) {
+			logger.error("[命令发送失败] 关闭摄像机: {}", e.getMessage());
+			throw new ControllerException(ErrorCode.ERROR100.getCode(), "命令发送失败: " + e.getMessage());
+		}
+		return WVPResult.success();
+	}
+
     /**
      * 录像控制命令API接口
      * 

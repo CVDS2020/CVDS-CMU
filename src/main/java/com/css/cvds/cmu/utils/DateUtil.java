@@ -70,11 +70,11 @@ public class DateUtil {
     }
 
     /**
-     * 获取当前时间
+     * 获取当前时间之前n小时的时间
      * @return
      */
     public static String getNowMinusHours(long hours) {
-        LocalDateTime dateTime = LocalDateTime.now().minusHours(24);
+        LocalDateTime dateTime = LocalDateTime.now().minusHours(hours);
         return formatter.format(dateTime);
     }
 

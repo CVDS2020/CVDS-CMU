@@ -54,7 +54,7 @@ public class SpringDocConfig {
     @Bean
     public GroupedOpenApi publicApi3() {
         return GroupedOpenApi.builder()
-                .group("3. 服务")
+                .group("3. 系统")
                 .packagesToScan("com.css.cvds.cmu.web.server")
                 .build();
     }

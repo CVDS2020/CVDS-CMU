@@ -4,10 +4,12 @@ import com.css.cvds.cmu.conf.exception.ControllerException;
 import com.css.cvds.cmu.conf.security.SecurityUtils;
 import com.css.cvds.cmu.storager.dao.dto.LogDto;
 import com.css.cvds.cmu.utils.DateUtil;
+import com.css.cvds.cmu.web.bean.DownloadInfo;
 import com.css.cvds.cmu.web.bean.ErrorCode;
 import com.css.cvds.cmu.conf.UserSetting;
 import com.css.cvds.cmu.service.ILogService;
 import com.css.cvds.cmu.storager.dao.dto.AccessLogDto;
+import com.css.cvds.cmu.web.bean.WVPResult;
 import com.github.pagehelper.PageInfo;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.async.DeferredResult;
 
 @Tag(name  = "日志管理")
 @CrossOrigin
@@ -99,7 +102,7 @@ public class LogController {
     public PageInfo<AccessLogDto> getAccessList(
             @RequestParam int page,
             @RequestParam int count,
-            @RequestParam(required = false)  String query,
+            @RequestParam(required = false) String query,
             @RequestParam(required = false) String type,
             @RequestParam(required = false) String startTime,
             @RequestParam(required = false) String endTime
@@ -137,4 +140,12 @@ public class LogController {
         logService.clearAccessLog();
     }
 
+    @GetMapping("/download")
+    @Operation(summary = "下载视频")
+    @Parameter(name = "type", description = "类型", required = true)
+    @Parameter(name = "startTime", description = "开始时间", required = true)
+    @Parameter(name = "endTime", description = "结束时间", required = true)
+    public WVPResult<?> export(String type, String startTime, String endTime) {
+        return WVPResult.success();
+    }
 }

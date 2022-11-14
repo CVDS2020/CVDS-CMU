@@ -311,22 +311,6 @@ public class DeviceQuery {
 		return WVPResult.success(new VideoConfig());
 	}
 
-	@Operation(summary = "重置视频配置信息")
-	@Parameter(name = "deviceId", description = "设备国标ID", required = true)
-	@PutMapping("/videoConfig/{deviceId}/reset")
-	public WVPResult<?> resetDeviceVideoConfig(@PathVariable String deviceId) {
-		if (!SecurityUtils.isAdmin()) {
-			throw new ControllerException(ErrorCode.ERROR400.getCode(), "没有权限进行此项操作");
-		}
-		Device device = deviceService.queryDevice(deviceId);
-		if (device == null) {
-			throw new ControllerException(ErrorCode.ERROR100.getCode(), "设备不存在");
-		}
-		logService.addUserLog(UserLogEnum.DATA_CONFIG, "重置视频配置信息：" + deviceId);
-
-		return WVPResult.success(null);
-	}
-
 	/**
 	 * 修改数据流传输模式
 	 * @param deviceId 设备id

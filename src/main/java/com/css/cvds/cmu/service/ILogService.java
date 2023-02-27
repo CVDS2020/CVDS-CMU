@@ -19,9 +19,11 @@ public interface ILogService {
      * @param type 类型
      * @param startTime 开始时间
      * @param endTime 结束时间
+     * @param userId 用户ID
+     * @param terminal 操作终端
      * @return 日志列表
      */
-    PageInfo<LogDto> getList(int page, int count, String query, Integer type, String startTime, String endTime);
+    PageInfo<LogDto> getList(int page, int count, String query, Integer type, String startTime, String endTime, Integer userId, String terminal);
 
     /**
      * 添加访问日志

@@ -31,14 +31,16 @@ public class StorageController {
 
     @GetMapping("/disk/list")
     @Operation(summary = "获取磁盘列表")
-    @Parameter(name = "diskNo", description = "磁盘号")
-    @Parameter(name = "status", description = "状态：空 全部，0 正常，1 故障")
-    @Parameter(name = "type", description = "类型：空 全部，0 本地，1 外挂")
+    @Parameter(name = "diskNo", description = "磁盘号", required = false)
+    @Parameter(name = "status", description = "状态：空 全部，0 正常，1 故障", required = false)
+    @Parameter(name = "type", description = "类型：空 全部，0 本地，1 外挂", required = false)
     @Parameter(name = "page", description = "当前页", required = true)
     @Parameter(name = "count", description = "每页查询数量", required = true)
-    public DeferredResult<WVPResult<Disk>> list(@RequestParam(required = false)Integer page,
-                                                @RequestParam(required = false)Integer count,
-                                                String diskNo, Integer status, Integer type) {
+    public DeferredResult<WVPResult<Disk>> list(Integer page,
+                                                Integer count,
+                                                @RequestParam(required = false)String diskNo,
+                                                @RequestParam(required = false)Integer status,
+                                                @RequestParam(required = false)Integer type) {
         DeferredResult<WVPResult<Disk>> resultDeferredResult =
                 new DeferredResult<>(30 * 1000L);
 
@@ -73,13 +75,23 @@ public class StorageController {
         return WVPResult.success(config);
     }
 
-    @PutMapping("/config")
+    @PostMapping("/config")
     @Operation(summary = "更新存储配置")
     public WVPResult<?> saveStorageConfig(@RequestBody StorageConfig config) {
         if (!SecurityUtils.isAdmin()) {
             throw new ControllerException(ErrorCode.ERROR400.getCode(), "没有权限进行此项操作");
         }
         logService.addUserLog(UserLogEnum.DATA_CONFIG, "更新存储配置");
+        return WVPResult.success(null);
+    }
+
+    @PutMapping("/config/reset")
+    @Operation(summary = "重置存储配置")
+    public WVPResult<?> resetStorageConfig() {
+        if (!SecurityUtils.isAdmin()) {
+            throw new ControllerException(ErrorCode.ERROR400.getCode(), "没有权限进行此项操作");
+        }
+        logService.addUserLog(UserLogEnum.DATA_CONFIG, "重置存储配置");
         return WVPResult.success(null);
     }
 }

@@ -157,8 +157,20 @@ public class AlarmController {
      * @return
      */
     @Operation(summary = "查询告警类型")
-    @GetMapping("/getAlarmType")
+    @GetMapping("/type")
     public WVPResult<List<String>> getAlarmType() {
+
+        return WVPResult.success(deviceAlarmService.getAlarmTypeList());
+    }
+
+    /**
+     *  查询告警级别
+     *
+     * @return
+     */
+    @Operation(summary = "查询告警级别")
+    @GetMapping("/priority")
+    public WVPResult<List<String>> getAlarmPriority() {
         return WVPResult.success(deviceAlarmService.getAlarmTypeList());
     }
 
@@ -168,7 +180,7 @@ public class AlarmController {
      * @return
      */
     @Operation(summary = "查询最近24小时报警")
-    @GetMapping("/getLast")
+    @GetMapping("/last")
     public WVPResult<List<DeviceAlarmVO>> getLast() {
         String startTime = DateUtil.getNowMinusHours(24);
         String endTime = DateUtil.getNow();
@@ -181,7 +193,7 @@ public class AlarmController {
      * @return
      */
     @Operation(summary = "设置告警状态")
-    @PutMapping("/{id}/setAlready")
+    @PutMapping("/{id}/status")
     @Parameter(name = "already",description = "false 未处理，true 已处理")
     public WVPResult<?> setAlready(@PathVariable Long id, @RequestParam Boolean already) {
         if (already == null || !already) {

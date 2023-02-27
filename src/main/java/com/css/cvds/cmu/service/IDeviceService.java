@@ -95,7 +95,18 @@ public interface IDeviceService {
      */
     Device queryDevice(String deviceId);
 
-    void updateConfig(VideoConfig config);
+    /**
+     * 更新设备配置信息
+     * @param deviceId 设备编号
+     *    config 配置
+     */
+    void updateConfig(String deviceId, VideoConfig config);
+
+    /**
+     * 重置设备配置信息
+     * @param deviceId 设备编号
+     */
+    void resetConfig(String deviceId);
 
     /**
      * 查询设备信息

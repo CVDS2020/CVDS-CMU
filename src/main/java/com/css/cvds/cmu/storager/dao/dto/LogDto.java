@@ -14,7 +14,7 @@ public class LogDto {
     private Long id;
     @Schema(description = "类型 0-系统日志，1-操作日志")
     private Integer type;
-    @Schema(description = "标题/事件")
+    @Schema(description = "标题/事件/操作类型")
     private String title;
     @Schema(description = "内容")
     private String content;
@@ -22,6 +22,8 @@ public class LogDto {
     private Integer userId;
     @Schema(description = "用户名")
     private String username;
+    @Schema(description = "操作终端")
+    private String terminal;
     @Schema(description = "日志时间")
     private Date createTime;
 
@@ -79,5 +81,13 @@ public class LogDto {
 
     public void setUserId(Integer userId) {
         this.userId = userId;
+    }
+
+    public String getTerminal() {
+        return terminal;
+    }
+
+    public void setTerminal(String terminal) {
+        this.terminal = terminal;
     }
 }

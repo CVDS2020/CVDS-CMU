@@ -28,9 +28,11 @@ public class LogServiceImpl implements ILogService {
     private LogMapper logMapper;
 
     @Override
-    public PageInfo<LogDto> getList(int page, int count, String query, Integer type, String startTime, String endTime) {
+    public PageInfo<LogDto> getList(int page, int count, String query,
+                                    Integer type, String startTime, String endTime,
+                                    Integer userId, String terminal) {
         PageHelper.startPage(page, count);
-        List<LogDto> all = logMapper.query(query, type, startTime, endTime);
+        List<LogDto> all = logMapper.query(query, type, startTime, endTime, userId, terminal);
         return new PageInfo<>(all);
     }
 
@@ -41,7 +43,9 @@ public class LogServiceImpl implements ILogService {
         logDto.setType(type.getType());
         logDto.setTitle(type.getName());
         logDto.setCreateTime(new Date());
+        logDto.setContent(content);
         if (Objects.nonNull(userInfo)) {
+            logDto.setTerminal(userInfo.getTerminal());
             logDto.setUserId(userInfo.getId());
         } else {
             logDto.setUserId(0);
@@ -56,6 +60,7 @@ public class LogServiceImpl implements ILogService {
         logDto.setTitle(type.getName());
         logDto.setCreateTime(new Date());
         logDto.setUserId(0);
+        logDto.setContent(content);
 
         logMapper.add(logDto);
     }

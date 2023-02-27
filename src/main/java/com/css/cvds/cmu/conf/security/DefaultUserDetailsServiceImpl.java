@@ -1,9 +1,10 @@
 package com.css.cvds.cmu.conf.security;
 
-import java.time.LocalDateTime;
-
+import com.alibaba.excel.util.StringUtils;
 import com.css.cvds.cmu.conf.security.dto.LoginUser;
+import com.css.cvds.cmu.service.IUserService;
 import com.css.cvds.cmu.storager.dao.dto.User;
+import com.css.cvds.cmu.utils.DateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,9 +12,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
-
-import com.alibaba.excel.util.StringUtils;
-import com.css.cvds.cmu.service.IUserService;
 
 /**
  * 用户登录认证逻辑
@@ -41,8 +39,6 @@ public class DefaultUserDetailsServiceImpl implements UserDetailsService {
         }
         String password = SecurityUtils.encryptPassword(user.getPassword());
         user.setPassword(password);
-        return new LoginUser(user, LocalDateTime.now());
+        return new LoginUser(user, DateUtil.getNow());
     }
-
-
 }

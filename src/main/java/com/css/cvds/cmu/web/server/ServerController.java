@@ -3,15 +3,13 @@ package com.css.cvds.cmu.web.server;
 import com.css.cvds.cmu.VManageBootstrap;
 import com.css.cvds.cmu.conf.exception.ControllerException;
 import com.css.cvds.cmu.conf.security.SecurityUtils;
+import com.css.cvds.cmu.conf.security.dto.LoginUser;
 import com.css.cvds.cmu.service.ILogService;
 import com.css.cvds.cmu.utils.BoardCardEnum;
 import com.css.cvds.cmu.utils.CollectUtils;
 import com.css.cvds.cmu.utils.SpringBeanFactory;
 import com.css.cvds.cmu.utils.UserLogEnum;
-import com.css.cvds.cmu.web.bean.BoardCard;
-import com.css.cvds.cmu.web.bean.ErrorCode;
-import com.css.cvds.cmu.web.bean.SystemInfo;
-import com.css.cvds.cmu.web.bean.WVPResult;
+import com.css.cvds.cmu.web.bean.*;
 import gov.nist.javax.sip.SipStackImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -72,16 +70,20 @@ public class ServerController {
     };
 
     @GetMapping("/info")
-    @Operation(summary = "获取系统信息")
-    public WVPResult<SystemInfo> info() {
+    @Operation(summary = "获取基本信息")
+    public WVPResult<BaseInfo> info() {
 
-        SystemInfo info = new SystemInfo();
-        info.setTypeCode("cvds-cmu");
-        info.setManufacturerCode("CSS-CVDS-CMU");
-        info.setSoftwareVersion("1.0");
-        info.setFirmwareVersion("1.0");
+        BaseInfo baseInfo = new BaseInfo();
+        baseInfo.setUserInfo(SecurityUtils.getUserInfo());
 
-        return WVPResult.success(info);
+        SystemInfo systemInfo = new SystemInfo();
+        systemInfo.setTypeCode("cvds-cmu");
+        systemInfo.setManufacturerCode("CSS-CVDS-CMU");
+        systemInfo.setSoftwareVersion("1.0");
+        systemInfo.setFirmwareVersion("1.0");
+        baseInfo.setSystemInfo(systemInfo);
+
+        return WVPResult.success(baseInfo);
     }
 
     @PutMapping("/correction")
@@ -118,8 +120,9 @@ public class ServerController {
 
     @PutMapping("/board/ctrl")
     @Operation(summary = "板卡控制")
-    @Parameter(name = "ctrl", description = "类型（0:关机，1:开机，2:重启）", required = true)
-    public DeferredResult<WVPResult<?>> boardCtrl() {
+    @Parameter(name = "action", description = "类型（0:关机，1:开机，2:重启）", required = true)
+    @Parameter(name = "type", description = "板卡类型：1-电源板，2-交换板，3-视频核心板，4-AI分析板", required = true)
+    public DeferredResult<WVPResult<?>> boardCtrl(Integer type, Integer action) {
 
         DeferredResult<WVPResult<?>> resultDeferredResult =
                 new DeferredResult<>(30 * 1000L);

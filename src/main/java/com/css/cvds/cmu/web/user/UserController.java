@@ -1,5 +1,6 @@
 package com.css.cvds.cmu.web.user;
 
+import com.css.cvds.cmu.common.HttpServletUtils;
 import com.css.cvds.cmu.conf.exception.ControllerException;
 import com.css.cvds.cmu.service.ILogService;
 import com.css.cvds.cmu.storager.dao.dto.LogDto;
@@ -12,11 +13,13 @@ import com.css.cvds.cmu.storager.dao.dto.Role;
 import com.css.cvds.cmu.storager.dao.dto.User;
 import com.css.cvds.cmu.utils.UserLogEnum;
 import com.css.cvds.cmu.web.bean.ErrorCode;
+import com.css.cvds.cmu.web.bean.WVPResult;
 import com.github.pagehelper.PageInfo;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.util.DigestUtils;
@@ -24,6 +27,8 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.security.sasl.AuthenticationException;
+import javax.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -51,19 +56,31 @@ public class UserController {
     @Operation(summary = "登录")
     @Parameter(name = "username", description = "用户名", required = true)
     @Parameter(name = "password", description = "密码（32位md5加密）", required = true)
-    public LoginUser login(@RequestParam String username, @RequestParam String password){
+    @Parameter(name = "terminal", description = "登录终端", required = true)
+    public WVPResult<LoginUser> login(HttpServletRequest request,
+                                      @RequestParam String username,
+                                      @RequestParam String password,
+                                      @RequestParam String terminal){
         LoginUser user = null;
+        String loginIp = HttpServletUtils.getRequestActualIp(request);
         try {
             user = SecurityUtils.login(username, password, authenticationManager);
+            user.setIp(loginIp);
+
+            if (StringUtils.isBlank(terminal)) {
+                user.setTerminal("WEB");
+            } else {
+                user.setTerminal(terminal);
+            }
         } catch (AuthenticationException e) {
             throw new ControllerException(ErrorCode.ERROR100.getCode(), e.getMessage());
         }
         if (user == null) {
             throw new ControllerException(ErrorCode.ERROR100.getCode(), "用户名或密码错误");
         }
-        logService.addUserLog(UserLogEnum.ONLINE, "登录系统成功");
+        logService.addUserLog(UserLogEnum.ONLINE, "登录系统成功: " + loginIp);
 
-        return user;
+        return WVPResult.success(user);
     }
 
     @PostMapping("/changePassword")
@@ -71,7 +88,7 @@ public class UserController {
     @Parameter(name = "username", description = "用户名", required = true)
     @Parameter(name = "oldpassword", description = "旧密码（已md5加密的密码）", required = true)
     @Parameter(name = "password", description = "新密码（未md5加密的密码）", required = true)
-    public void changePassword(@RequestParam String oldPassword, @RequestParam String password){
+    public WVPResult<?> changePassword(@RequestParam String oldPassword, @RequestParam String password){
         // 获取当前登录用户id
         LoginUser userInfo = SecurityUtils.getUserInfo();
         if (userInfo== null) {
@@ -93,6 +110,7 @@ public class UserController {
         } catch (AuthenticationException e) {
             throw new ControllerException(ErrorCode.ERROR100.getCode(), e.getMessage());
         }
+        return WVPResult.success();
     }
 
     @PostMapping("/add")
@@ -103,7 +121,7 @@ public class UserController {
     @Parameter(name = "department", description = "部门")
     @Parameter(name = "phone", description = "电话")
     @Parameter(name = "description", description = "描述")
-    public void add(@RequestParam String username,
+    public WVPResult<?> add(@RequestParam String username,
                     @RequestParam String password,
                     @RequestParam Integer roleId,
                     @RequestParam String department,
@@ -138,18 +156,19 @@ public class UserController {
             throw new ControllerException(ErrorCode.ERROR100);
         }
         logService.addUserLog(UserLogEnum.DATA_CONFIG, "添加用户：" + user.getUsername());
+        return WVPResult.success();
     }
 
     @DeleteMapping("/delete")
     @Operation(summary = "删除用户")
     @Parameter(name = "id", description = "用户Id", required = true)
-    public void delete(@RequestParam Integer id){
+    public WVPResult<?> delete(@RequestParam Integer id){
         if (!SecurityUtils.isAdmin()) {
             throw new ControllerException(ErrorCode.ERROR400.getCode(), "没有权限进行此项操作");
         }
         User user = userService.getUser(id);
         if (Objects.isNull(user)) {
-            return;
+            return WVPResult.success();
         }
         int currentRoleId = SecurityUtils.getUserInfo().getRole().getId();
         if (!Objects.equals(user.getRole().getId(), Role.OPERATOR_ID) && currentRoleId != Role.ADMIN_ID) {
@@ -160,13 +179,15 @@ public class UserController {
             throw new ControllerException(ErrorCode.ERROR100);
         }
         logService.addUserLog(UserLogEnum.DATA_CONFIG, "删除用户：" + user.getUsername());
+
+        return WVPResult.success();
     }
 
     @GetMapping("/all")
-    @Operation(summary = "查询用户")
-    public List<User> all(){
+    @Operation(summary = "查询所有用户")
+    public WVPResult<List<User>> all(){
         // 获取当前登录用户id
-        return userService.getAllUsers();
+        return WVPResult.success(userService.getAllUsers());
     }
 
     /**
@@ -180,8 +201,8 @@ public class UserController {
     @Operation(summary = "分页查询用户")
     @Parameter(name = "page", description = "当前页", required = true)
     @Parameter(name = "count", description = "每页查询数量", required = true)
-    public PageInfo<User> users(int page, int count) {
-        return userService.getUsers(page, count);
+    public WVPResult<PageInfo<User>> users(int page, int count) {
+        return WVPResult.success(userService.getUsers(page, count));
     }
 
     @PostMapping("/changePasswordForAdmin")
@@ -189,7 +210,7 @@ public class UserController {
     @Parameter(name = "adminId", description = "管理员id", required = true)
     @Parameter(name = "userId", description = "用户id", required = true)
     @Parameter(name = "password", description = "新密码（未md5加密的密码）", required = true)
-    public void changePasswordForAdmin(@RequestParam int userId, @RequestParam String password) {
+    public WVPResult<?> changePasswordForAdmin(@RequestParam int userId, @RequestParam String password) {
         // 获取当前登录用户id
         LoginUser userInfo = SecurityUtils.getUserInfo();
         if (userInfo == null) {
@@ -211,5 +232,6 @@ public class UserController {
                 throw new ControllerException(ErrorCode.ERROR100);
             }
         }
+        return WVPResult.success();
     }
 }

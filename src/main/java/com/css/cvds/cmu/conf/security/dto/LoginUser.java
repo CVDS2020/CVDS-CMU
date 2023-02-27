@@ -6,8 +6,6 @@ import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.SpringSecurityCoreVersion;
 import org.springframework.security.core.userdetails.UserDetails;
-
-import java.time.LocalDateTime;
 import java.util.Collection;
 
 public class LoginUser implements UserDetails, CredentialsContainer {
@@ -23,13 +21,27 @@ public class LoginUser implements UserDetails, CredentialsContainer {
     /**
      * 登录时间
      */
-    private LocalDateTime loginTime;
+    private String loginTime;
 
-    public LoginUser(User user, LocalDateTime loginTime) {
+    /**
+     * 登录终端
+     */
+    private String terminal;
+
+    /**
+     * 登录IP
+     */
+    private String ip;
+
+    /**
+     *
+     * @param user
+     * @param loginTime
+     */
+    public LoginUser(User user, String loginTime) {
         this.user = user;
         this.loginTime = loginTime;
     }
-
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -99,4 +111,23 @@ public class LoginUser implements UserDetails, CredentialsContainer {
 
     public boolean isAdmin() { return getRole().getId() < Role.OPERATOR_ID; }
 
+    public String getTerminal() {
+        return terminal;
+    }
+
+    public void setTerminal(String terminal) {
+        this.terminal = terminal;
+    }
+
+    public String getIp() {
+        return ip;
+    }
+
+    public void setIp(String ip) {
+        this.ip = ip;
+    }
+
+    public String getLoginTime() {
+        return loginTime;
+    }
 }

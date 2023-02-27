@@ -20,9 +20,9 @@ spring:
     datasource:
         type: com.alibaba.druid.pool.DruidDataSource
         driver-class-name: com.mysql.cj.jdbc.Driver
-        url: jdbc:mysql://192.168.1.55:3306/cvdsdbs?useUnicode=true&characterEncoding=UTF8&rewriteBatchedStatements=true&serverTimezone=PRC&useSSL=false&allowMultiQueries=true
+        url: jdbc:mysql://117.33.159.219:14210/cvdsdbs?useUnicode=true&characterEncoding=UTF8&rewriteBatchedStatements=true&serverTimezone=PRC&useSSL=false&allowMultiQueries=true
         username: root
-        password: css66018
+        password: Css@66018
         druid:
             initialSize: 10                       # 连接池初始化连接数
             maxActive: 200                        # 连接池最大连接数

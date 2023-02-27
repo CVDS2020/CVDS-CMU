@@ -251,37 +251,37 @@ public class DeviceControl {
 		return result;
 	}
 
-	/**
-	 * 强制关键帧API接口
-	 * 
-	 * @param	deviceId 设备ID
-	 * @param	channelId  通道ID
-	 */
-	@Operation(summary = "强制关键帧")
-	@Parameter(name = "deviceId", description = "设备编号", required = true)
-	@Parameter(name = "channelId", description = "通道编号")
-	@GetMapping("/i_frame/{deviceId}")
-	public JSONObject iFrame(@PathVariable String deviceId,
-										@RequestParam(required = false) String channelId) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("强制关键帧API调用");
-		}
-		if (!SecurityUtils.isAdmin()) {
-			throw new ControllerException(ErrorCode.ERROR400.getCode(), "没有权限进行此项操作");
-		}
-		Device device = storager.queryVideoDevice(deviceId);
-		try {
-			cmder.iFrameCmd(device, channelId);
-		} catch (InvalidArgumentException | SipException | ParseException e) {
-			logger.error("[命令发送失败] 强制关键帧: {}", e.getMessage());
-			throw new ControllerException(ErrorCode.ERROR100.getCode(), "命令发送失败: " + e.getMessage());
-		}
-		JSONObject json = new JSONObject();
-		json.put("DeviceID", deviceId);
-		json.put("ChannelID", channelId);
-		json.put("Result", "OK");
-		return json;
-	}
+//	/**
+//	 * 强制关键帧API接口
+//	 *
+//	 * @param	deviceId 设备ID
+//	 * @param	channelId  通道ID
+//	 */
+//	@Operation(summary = "强制关键帧")
+//	@Parameter(name = "deviceId", description = "设备编号", required = true)
+//	@Parameter(name = "channelId", description = "通道编号")
+//	@GetMapping("/i_frame/{deviceId}")
+//	public JSONObject iFrame(@PathVariable String deviceId,
+//										@RequestParam(required = false) String channelId) {
+//		if (logger.isDebugEnabled()) {
+//			logger.debug("强制关键帧API调用");
+//		}
+//		if (!SecurityUtils.isAdmin()) {
+//			throw new ControllerException(ErrorCode.ERROR400.getCode(), "没有权限进行此项操作");
+//		}
+//		Device device = storager.queryVideoDevice(deviceId);
+//		try {
+//			cmder.iFrameCmd(device, channelId);
+//		} catch (InvalidArgumentException | SipException | ParseException e) {
+//			logger.error("[命令发送失败] 强制关键帧: {}", e.getMessage());
+//			throw new ControllerException(ErrorCode.ERROR100.getCode(), "命令发送失败: " + e.getMessage());
+//		}
+//		JSONObject json = new JSONObject();
+//		json.put("DeviceID", deviceId);
+//		json.put("ChannelID", channelId);
+//		json.put("Result", "OK");
+//		return json;
+//	}
 
 	/**
 	 * 看守位控制命令API接口

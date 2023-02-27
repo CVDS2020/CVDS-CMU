@@ -17,8 +17,8 @@ import java.util.List;
 @Repository
 public interface LogMapper {
 
-    @Insert("insert into log ( type, userId, title, content) " +
-            "values ('${type}', '${userId}', '${title}', '${content}')")
+    @Insert("insert into log ( type, userId, terminal, title, content) " +
+            "values ('${type}', '${userId}', '${terminal}', '${title}', '${content}')")
     int add(LogDto logDto);
 
     @Select(value = {"<script>" +
@@ -26,11 +26,13 @@ public interface LogMapper {
             " WHERE 1=1 " +
             " <if test=\"query != null\"> AND (title LIKE '%${query}%' OR content LIKE '%${query}%')</if> " +
             " <if test=\"type != null\" >  AND type = '${type}'</if>" +
+            " <if test=\"userId != null\" >  AND userId = '${userId}'</if>" +
+            " <if test=\"terminal != null\" >  AND terminal = '${terminal}'</if>" +
             " <if test=\"startTime != null\" >  AND createTime &gt;= '${startTime}' </if>" +
             " <if test=\"endTime != null\" >  AND createTime &lt;= '${endTime}' </if>" +
             " ORDER BY createTime DESC " +
             " </script>"})
-    List<LogDto> query(String query, Integer type, String startTime, String endTime);
+    List<LogDto> query(String query, Integer type, String startTime, String endTime, Integer userId, String terminal);
 
     @Delete("DELETE FROM log")
     int clear();

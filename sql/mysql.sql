@@ -365,6 +365,7 @@ CREATE TABLE `log`  (
     `id` bigint NOT NULL AUTO_INCREMENT COMMENT 'ID',
     `type` int(11) NOT NULL COMMENT '日志类型：0-系统日志，1-操作日志',
     `userId` int(11) DEFAULT 0 COMMENT '用户ID，0-表示系统',
+    `terminal` varchar(100) DEFAULT NULL COMMENT '操作终端（用户登录终端）',
     `title` varchar(100) NOT NULL COMMENT '标题',
     `content` varchar(255) NOT NULL COMMENT '日志内容',
     `createTime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',

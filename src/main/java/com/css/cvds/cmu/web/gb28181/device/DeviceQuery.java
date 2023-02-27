@@ -293,9 +293,27 @@ public class DeviceQuery {
 		if (device == null) {
 			throw new ControllerException(ErrorCode.ERROR100.getCode(), "设备不存在");
 		}
-		deviceService.updateConfig(config);
+		deviceService.updateConfig(deviceId, config);
 
 		logService.addUserLog(UserLogEnum.DATA_CONFIG, "更新视频配置信息：" + deviceId);
+
+		return WVPResult.success(null);
+	}
+
+	@Operation(summary = "重置视频配置信息")
+	@Parameter(name = "deviceId", description = "设备国标ID", required = true)
+	@PutMapping("/videoConfig/{deviceId}/reset")
+	public WVPResult<?> resetDeviceVideoConfig(@PathVariable String deviceId) {
+		if (!SecurityUtils.isAdmin()) {
+			throw new ControllerException(ErrorCode.ERROR400.getCode(), "没有权限进行此项操作");
+		}
+		Device device = deviceService.queryDevice(deviceId);
+		if (device == null) {
+			throw new ControllerException(ErrorCode.ERROR100.getCode(), "设备不存在");
+		}
+		deviceService.resetConfig(deviceId);
+
+		logService.addUserLog(UserLogEnum.DATA_CONFIG, "重置视频配置信息：" + deviceId);
 
 		return WVPResult.success(null);
 	}

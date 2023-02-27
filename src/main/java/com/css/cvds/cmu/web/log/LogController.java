@@ -3,8 +3,9 @@ package com.css.cvds.cmu.web.log;
 import com.css.cvds.cmu.conf.exception.ControllerException;
 import com.css.cvds.cmu.conf.security.SecurityUtils;
 import com.css.cvds.cmu.storager.dao.dto.LogDto;
+import com.css.cvds.cmu.storager.dao.dto.Terminal;
+import com.css.cvds.cmu.storager.dao.dto.User;
 import com.css.cvds.cmu.utils.DateUtil;
-import com.css.cvds.cmu.web.bean.DownloadInfo;
 import com.css.cvds.cmu.web.bean.ErrorCode;
 import com.css.cvds.cmu.conf.UserSetting;
 import com.css.cvds.cmu.service.ILogService;
@@ -12,6 +13,7 @@ import com.css.cvds.cmu.storager.dao.dto.AccessLogDto;
 import com.css.cvds.cmu.web.bean.WVPResult;
 import com.github.pagehelper.PageInfo;
 
+import com.google.common.collect.Lists;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,6 +23,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
+
+import java.util.List;
+import java.util.Objects;
 
 @Tag(name  = "日志管理")
 @CrossOrigin
@@ -55,13 +60,17 @@ public class LogController {
     @Parameter(name = "type", description = "类型 0-系统日志，1-操作日志")
     @Parameter(name = "startTime", description = "开始时间", required = true)
     @Parameter(name = "endTime", description = "结束时间", required = true)
-    public PageInfo<LogDto> getList(
+    @Parameter(name = "userId", description = "用户ID", required = false)
+    @Parameter(name = "terminal", description = "操作终端", required = false)
+    public WVPResult<PageInfo<LogDto>> getList(
             @RequestParam int page,
             @RequestParam int count,
             @RequestParam(required = false)  String query,
             @RequestParam(required = false) Integer type,
             @RequestParam(required = false) String startTime,
-            @RequestParam(required = false) String endTime
+            @RequestParam(required = false) String endTime,
+            @RequestParam(required = false) Integer userId,
+            @RequestParam(required = false) String terminal
     ) {
         if (ObjectUtils.isEmpty(query)) {
             query = null;
@@ -72,12 +81,17 @@ public class LogController {
         if (ObjectUtils.isEmpty(endTime)) {
             endTime = null;
         }
-
+        if (Objects.equals(userId, 0)) {
+            userId = null;
+        }
+        if (ObjectUtils.isEmpty(terminal)) {
+            terminal = null;
+        }
         if (!DateUtil.verification(startTime, DateUtil.formatter) || !DateUtil.verification(endTime, DateUtil.formatter)){
             throw new ControllerException(ErrorCode.ERROR400);
         }
 
-        return logService.getList(page, count, query, type, startTime, endTime);
+        return WVPResult.success(logService.getList(page, count, query, type, startTime, endTime, userId, terminal));
     }
 
     /**
@@ -99,7 +113,7 @@ public class LogController {
     @Parameter(name = "type", description = "类型", required = true)
     @Parameter(name = "startTime", description = "开始时间", required = true)
     @Parameter(name = "endTime", description = "结束时间", required = true)
-    public PageInfo<AccessLogDto> getAccessList(
+    public WVPResult<PageInfo<AccessLogDto>> getAccessList(
             @RequestParam int page,
             @RequestParam int count,
             @RequestParam(required = false) String query,
@@ -124,7 +138,7 @@ public class LogController {
             throw new ControllerException(ErrorCode.ERROR400);
         }
 
-        return logService.getAccessList(page, count, query, type, startTime, endTime);
+        return WVPResult.success(logService.getAccessList(page, count, query, type, startTime, endTime));
     }
 
     /**
@@ -133,19 +147,28 @@ public class LogController {
      */
     @Operation(summary = "清空访问日志")
     @DeleteMapping("/access/clear")
-    public void clear() {
+    public WVPResult<?> clear() {
         if (!SecurityUtils.isAdmin()) {
             throw new ControllerException(ErrorCode.ERROR400.getCode(), "没有权限进行此项操作");
         }
         logService.clearAccessLog();
+        return WVPResult.success();
     }
 
     @GetMapping("/download")
-    @Operation(summary = "下载视频")
-    @Parameter(name = "type", description = "类型", required = true)
+    @Operation(summary = "日志下载")
+    @Parameter(name = "type", description = "类型(List) 0-系统日志，1-操作日志，2，告警日志")
     @Parameter(name = "startTime", description = "开始时间", required = true)
     @Parameter(name = "endTime", description = "结束时间", required = true)
-    public WVPResult<?> export(String type, String startTime, String endTime) {
+    public WVPResult<?> export(List<Integer> type, String startTime, String endTime) {
+
         return WVPResult.success();
+    }
+
+    @GetMapping("/terminal/list")
+    @Operation(summary = "查询有日志信息的终端列表")
+    public WVPResult<List<Terminal>> all() {
+        // 获取当前登录用户id
+        return WVPResult.success(Lists.newArrayList());
     }
 }

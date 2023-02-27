@@ -46,6 +46,12 @@ public interface IDeviceAlarmService {
     List<String> getAlarmTypeList();
 
     /**
+     * 根据获取报警级别列表
+     * @return 报警级别
+     */
+    List<String> getAlarmPriorityList();
+
+    /**
      * 添加一个报警
      * @param deviceAlarm 添加报警
      */

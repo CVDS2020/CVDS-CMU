@@ -285,7 +285,12 @@ public class DeviceServiceImpl implements IDeviceService {
     }
 
     @Override
-    public void updateConfig(VideoConfig config) {
+    public void updateConfig(String deviceId, VideoConfig config) {
+
+    }
+
+    @Override
+    public void resetConfig(String deviceId) {
 
     }
 

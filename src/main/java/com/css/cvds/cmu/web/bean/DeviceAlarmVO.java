@@ -70,7 +70,7 @@ public class DeviceAlarmVO {
 	 * 		1-存储设备磁盘故障报警;
 	 * 		2-存储设备风扇故障报警。
 	 */
-	@Schema(description = "报警类型")
+	@Schema(description = "报警类型/故障类型")
 	private String alarmType;
 
 	@Schema(description = "创建时间")

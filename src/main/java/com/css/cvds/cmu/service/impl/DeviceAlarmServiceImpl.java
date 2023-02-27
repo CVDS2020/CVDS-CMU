@@ -57,6 +57,11 @@ public class DeviceAlarmServiceImpl implements IDeviceAlarmService {
     }
 
     @Override
+    public List<String> getAlarmPriorityList() {
+        return deviceAlarmMapper.queryAlarmPriority();
+    }
+
+    @Override
     public void add(DeviceAlarm deviceAlarm) {
         deviceAlarmMapper.add(deviceAlarm);
     }

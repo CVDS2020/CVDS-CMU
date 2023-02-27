@@ -51,4 +51,7 @@ public interface DeviceAlarmMapper {
 
     @Select(value = {"SELECT alarmType FROM `device_alarm` GROUP BY alarmType"})
     List<String> queryAlarmType();
+
+    @Select(value = {"SELECT alarmPriority FROM `device_alarm` GROUP BY alarmPriority"})
+    List<String> queryAlarmPriority();
 }

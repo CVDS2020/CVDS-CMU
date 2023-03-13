@@ -252,7 +252,7 @@ CREATE TABLE `user` (
     `updateTime` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
     PRIMARY KEY (`id`) USING BTREE,
     UNIQUE KEY `user_username_uindex` (`username`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=100 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -314,12 +314,10 @@ DROP TABLE IF EXISTS `storage_plan`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `storage_plan` (
     `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-    `name` varchar(60) NOT NULL COMMENT '存储计划名称',
-    `enable` bigint NOT NULL COMMENT '是否启用，0-未启用，1-启用',
-    `cover` bigint unsigned NOT NULL COMMENT '存储计划覆盖天数',
-    `directory` varchar(255) NOT NULL COMMENT '存储目录',
+    `superviseTargetType` int(11) DEFAULT NULL COMMENT '监视物类型, @supervise_target_type.type',
+    `cover` bigint unsigned NOT NULL COMMENT '存储计划覆盖天数'
     PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='存储计划表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='存储计划表';
 
 -- 监视物类型 --
 DROP TABLE IF EXISTS `supervise_target_type`;
